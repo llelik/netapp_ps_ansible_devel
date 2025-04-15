@@ -1,0 +1,207 @@
+#########################
+# Playbook creates:
+#- 
+#
+# (c) Alexey Mikhaylov
+# NetApp Professional Services Germany
+# alexey.mikhaylov@netapp.com  
+#
+# DEMO purpose only!
+#########################
+
+---
+- hosts: localhost
+  gather_facts: no
+  connection: local
+  vars_files:
+    - "../vars.yml"
+  tasks:
+    - name: Set connection details dest
+      ansible.builtin.set_fact:
+        dest_auth:          &dest_auth
+          username:         "{{ dst_cluster.username }}"
+          password:         "{{ dst_cluster.password }}"
+          hostname:         "{{ dst_cluster.hostname }}"
+          validate_certs:   false
+          use_rest:         Auto
+      no_log: true
+
+    - name: Set connection details source
+      ansible.builtin.set_fact:
+        src_auth:           &src_auth
+          username:         "{{ src_cluster.username }}"
+          password:         "{{ src_cluster.password }}"
+          hostname:         "{{ src_cluster.hostname }}"
+          validate_certs:   false
+          use_rest:         Always
+      no_log: true
+    
+    - name: Create source SVM
+      netapp.ontap.na_ontap_svm:
+        <<: *src_auth
+        state: present
+        name: "{{ src_cluster.svm }}"
+        services:
+          cifs:
+            allowed: false
+          fcp:
+            allowed: false
+            enabled: false
+          nfs:
+            allowed: false
+            enabled: false
+          iscsi:
+            allowed: true
+            enabled: true
+      register: src_svm_create_result
+    
+    - name: Create export policy
+      netapp.ontap.na_ontap_export_policy:
+        state: present
+        vserver: "{{ src_cluster.svm }}"
+        name: "test_export_policy"
+        <<: *src_auth
+
+    - name: "Add new export rules"
+      netapp.ontap.na_ontap_export_policy_rule:
+        state: present
+        name: "test_export_policy"
+        vserver: "{{ src_cluster.svm }}"
+        client_match: "{{ item.client_match }}"
+        ro_rule: "{{ item.ro_rule }}"
+        rw_rule: "{{ item.rw_rule }}"
+        protocol: "{{ item.protocol }}"
+        super_user_security: "{{ item.super_user_security }}"
+        <<: *src_auth
+      loop: 
+        - { 'name': 'test1', 'client_match': '172.30.0.0/16', 'ro_rule': 'sys', 'rw_rule': 'sys', 'protocol': 'nfs', 'super_user_security': 'none' }
+        - { 'name': 'test2', 'client_match': '192.168.0.0/16', 'ro_rule': 'sys', 'rw_rule': 'sys', 'protocol': 'nfs', 'super_user_security': 'none' }
+      loop_control:
+        label: "{{ item.client_match  }}"
+
+    - name: Create DR SVM
+      netapp.ontap.na_ontap_svm:
+        <<: *dest_auth
+        state: present
+        name: "{{ dst_cluster.svm }}"
+        #subtype: dp_destination
+      register: src_svm_create_result
+
+    - name: Create data volume
+      netapp.ontap.na_ontap_volume:
+        <<: *src_auth
+        state: present
+        name:  vol1
+        vserver: "{{ src_cluster.svm }}"
+        size: 5
+        size_unit: gb
+        space_guarantee: none
+        export_policy: default
+        wait_for_completion: true
+        aggregate_name: "{{ src_cluster.data_aggregate }}"
+
+    - name: collect SVM source info
+      netapp.ontap.na_ontap_rest_info:
+        <<: *src_auth
+        use_python_keys: true
+        gather_subset: 
+          #- "svm/svms"
+          # #- "protocols/nfs/export-policies"
+          #- snapshot_policy_info
+          #- protocols/nfs/services
+          - name-services/dns
+        fields:
+          - '**'
+        # owning_resource:
+        #   svm_name: "{{ src_cluster.svm }}"
+        #   policy_name: "test_export_policy"
+        parameters:
+          svm.name: "{{ src_cluster.svm }}"
+      register: svm_source_info
+
+    - debug: var=svm_source_info
+    - name: collect SVM dest info
+      netapp.ontap.na_ontap_rest_info:
+        <<: *dest_auth
+        use_python_keys: true
+        gather_subset: 
+          #- "svm/svms"
+          # ##- "protocols/nfs/export-policies"
+          #- snapshot_policy_info
+          #- protocols/nfs/services
+          - name-services/dns
+        fields:
+          - '**'
+        # owning_resource:
+        #   svm_name: "{{ dst_cluster.svm }}"
+        #   policy_name: "test_export_policy"
+          #rule_index: '*'
+        parameters:
+          svm.name: "{{ dst_cluster.svm }}"
+      register: svm_dest_info
+
+    - set_fact:
+        svm_source_info_all: "{{ svm_source_info.ontap_info | process_ontap_info }}"
+        svm_dest_info_all: "{{ svm_dest_info.ontap_info | process_ontap_info }}"
+
+    - debug: var=svm_source_info_all
+    - debug: var=svm_dest_info_all
+
+    - name: show diff
+      set_fact:
+        svmdiff: "{{ (svm_source_info_all | to_json)  | compare_svm(svm_dest_info_all | to_json, ['aggregates', 'uuid', '_links', 'self', 'href']) }}"
+    
+    - debug: var=svmdiff
+
+    - name: Create SVM peering
+      netapp.ontap.na_ontap_vserver_peer:
+        <<: *src_auth
+        state: present
+        use_rest: always
+        vserver: "{{ src_cluster.svm }}"
+        peer_vserver: "{{ dst_cluster.svm }}"
+        peer_cluster: "{{ dst_cluster.cluster }}"
+        peer_options:
+          hostname: "{{ dst_cluster.hostname }}"
+        applications:
+          - snapmirror
+
+    - name: Create SnapMirror relationship - SVM pseudo DR
+      netapp.ontap.na_ontap_snapmirror:
+        <<: *dest_auth
+        state: present
+        hostname: "{{ dst_cluster.hostname }}"
+        source_endpoint:
+          cluster: "{{ src_cluster.cluster }}"
+          path: "{{ src_cluster.svm + ':' }}"
+        destination_endpoint:
+          cluster: "{{ dst_cluster.cluster }}"
+          path: "{{ dst_cluster.svm + ':' }}"
+        create_destination:
+          enabled: true
+      when: 1 == 0
+
+...
+
+# SVM-level configurations:
+# - SVM name
+# - Language settings
+# - Aggregates (names and UUIDs)
+# - IPSpace (name and UUID)
+# - Security certificates (UUIDs)
+# - Snapshot policies (UUIDs)
+# - NFS configuration (allowed and enabled status)
+# - CIFS configuration (allowed and enabled status)
+# - iSCSI configuration (allowed and enabled status)
+# - FCP configuration (allowed and enabled status)
+# - NDMP configuration (allowed status)
+
+# Data protection and replication settings:
+# - SnapMirror relationships (including SnapMirror policy and schedule)
+# - SnapVault relationships (including SnapVault policy and schedule)
+
+# Protocols and services:
+# - NFS exports
+# - CIFS shares
+# - iSCSI LUNs and targets
+# - FCP LUNs and targets

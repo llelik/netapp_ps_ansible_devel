@@ -1,0 +1,113 @@
+---
+# defaults file for svm_clone
+config_api_paths:
+  svm:
+      path: "svm/svms"
+      fields:
+      - name
+      - uuid
+      - subtype
+      - iscsi.enabled
+      - iscsi.allowed
+      - nfs.enabled
+      - nfs.allowed
+      - cifs.enabled
+      - cifs.allowed
+      - cifs.name
+      - cifs.ad_domain.organizational_unit
+      - cifs.ad_domain.fqdn
+      - fcp.enabled
+      - fcp.allowed
+      - ndmp.allowed
+      - nvme.enabled
+      - nvme.allowed
+      - language
+      - ipspace.name
+      - snapshot_policy.name
+      - aggregates
+      - anti_ransomware_default_volume_state
+      - is_space_enforcement_logical
+  export_policy:
+      path: "protocols/nfs/export-policies"
+      fields:
+      - name
+      - rules
+      - rules.client_match
+      - rules.ro_rule
+      - rules.rw_rule
+      - rules.protocol
+      - rules.super_user_security
+  nfs:
+      path: "protocols/nfs/services"
+      fields:
+      - enabled
+      - protocol
+      - showmount_enabled
+      - vstorage_enabled
+      - auth_sys_extended_groups_enabled
+      - extended_groups_limit 
+      - file_session_io_grouping_count 
+      - qtree.export_enabled
+      - qtree.validate_export
+      - rquota_enabled
+      - root.skip_write_permission_check 
+      - root.ignore_nt_acl 
+      - credential_cache           #dict
+      - file_session_io_grouping_duration 
+      - access_cache_config #dict
+      - transport.tcp_enabled
+      - transport.udp_enabled
+      - transport.rdma_enabled
+      - transport.tcp_max_transfer_size 
+      - protocol.v4_session_slot_reply_cache_size 
+      - protocol.v4_id_domain
+      - protocol.v3_enabled
+      - protocol.v4_grace_seconds 
+      - protocol.v4_lease_seconds 
+      - protocol.v4_64bit_identifiers_enabled 
+      - protocol.v3_64bit_identifiers_enabled 
+      - protocol.v42_features      #dict
+      - protocol.v40_features      #dict
+      - protocol.v3_features       #dict
+      - protocol.v41_features      #dict
+      - protocol.v4_session_slots 
+      - protocol.v4_fsid_change 
+      - protocol.v41_enabled
+      - protocol.v40_enabled
+      - protocol_access_rules      #dict
+      - security                   #dict
+
+  iscsi:
+      path: "protocols/san/iscsi/services"
+      fields:
+        - target.alias
+        - target.name
+  cifs:
+      path: "protocols/cifs/services"
+      fields:
+        - enabled
+        - ad_domain.organizational_unit
+        - ad_domain.fqdn
+        - netbios.aliases
+        - netbios.enabled
+        - netbios.wins_servers
+        - security.session_security
+        - security.use_start_tls
+        - security.smb_encryption
+        - security.smb_signing
+        - security.try_ldap_channel_binding
+        - security.restrict_anonymous
+        - security.lm_compatibility_level
+        - security.ldap_referral_enabled
+        - security.kdc_encryption
+        - default_unix_user
+        - security.encrypt_dc_connection
+        - security.aes_netlogon_enabled
+        - security.use_ldaps 
+        - group_policy_object_enabled 
+  cifs_privileges:
+      path: "protocols/cifs/users-and-groups/privileges"
+      #cifs.administrators
+      fields:
+        - name
+        - privileges

@@ -1,0 +1,87 @@
+#########################
+# Playbook creates:
+#- clone of an svm configuration
+#
+# (c) Alexey Mikhaylov
+# NetApp Professional Services Germany
+# alexey.mikhaylov@netapp.com  
+#
+# DEMO purpose only!
+#########################
+
+---
+- hosts: localhost
+  gather_facts: no
+  connection: local
+  collections: 
+    - netapp_ps.ontap_specials
+    - netapp_ps.ontap
+    - netapp_ps.maf
+  vars: 
+    vars_absolute_path: /home/cbcadmin/vars/
+    vars_templates:
+    vars_overrides:
+    vars_local:
+    qlogname: "create_svm.test"       # log file name prefix
+    qlogdir:  "{{ vars['playbook_dir'] }}/logs"    # log file directory
+  vars_files:
+    - "{{ vars_absolute_path }}/vars.yml"
+  tasks:
+    - name: Set naming facts - Credentials
+      ansible.builtin.set_fact:
+        ontap_username: "{{ src_cluster.username }}"
+        ontap_password: "{{ src_cluster.password }}"
+        cluster:
+          management_ip: "{{ src_cluster.hostname }}"
+      no_log: false
+    
+    - name: Read data and create SVM
+      include_role: 
+        name: netapp_ps.ontap_specials.svm_clone
+      vars:
+        source_cluster:   "{{ src_cluster }}"
+        dest_cluster:     "{{ dst_cluster }}"
+        api_path_subset: svm
+        clone_config:
+          - nfs
+          - cifs
+          - iscsi
+        new_svm_name: "{{ dst_cluster.svm }}"
+    
+    - debug: var=vars_local
+    - debug: var=vars_defaults
+
+    - ansible.builtin.include_role:
+        name: netapp_ps.ontap.svm
+      vars:
+        qtask: facts
+        qchild: clone_source
+    - ansible.builtin.include_role: 
+        name: netapp_ps.ontap.svm
+      vars:
+        qtask: create
+        qchild: souclone_sourcerce 
+...
+
+# SVM-level configurations:
+# - SVM name
+# - Language settings
+# - Aggregates (names and UUIDs)
+# - IPSpace (name and UUID)
+# - Security certificates (UUIDs)
+# - Snapshot policies (UUIDs)
+# - NFS configuration (allowed and enabled status)
+# - CIFS configuration (allowed and enabled status)
+# - iSCSI configuration (allowed and enabled status)
+# - FCP configuration (allowed and enabled status)
+# - NDMP configuration (allowed status)
+
+# Data protection and replication settings:
+# - SnapMirror relationships (including SnapMirror policy and schedule)
+# - SnapVault relationships (including SnapVault policy and schedule)
+
+# Protocols and services:
+# - NFS exports
+# - CIFS shares
+# - iSCSI LUNs and targets
+# - FCP LUNs and targets

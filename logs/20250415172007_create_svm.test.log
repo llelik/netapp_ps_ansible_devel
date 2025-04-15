@@ -1,0 +1,33 @@
+
+
+ontap/svm/create
+----------------
+cluster:
+  management_ip: jamaica.muccbc.hq.netapp.com
+  name: jamaica
+
+svm:
+  cifs: {}
+  ipspace: Default
+  language: c.utf_8
+  name: svm_alexeym300_clone
+  services:
+    cifs:
+      allowed: false
+    fcp:
+      allowed: false
+      enabled: false
+    iscsi:
+      allowed: true
+      enabled: true
+    nfs:
+      allowed: true
+      enabled: true
+    nvme:
+      allowed: true
+      enabled: true
+    s3: {}
+  snapshot_policy:
+    name: default
+  subtype: default
+

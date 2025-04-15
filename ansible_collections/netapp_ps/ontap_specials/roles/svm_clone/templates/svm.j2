@@ -1,0 +1,33 @@
+clone_source:
+  cluster:
+    name:                {{ src_cluster.cluster }}
+    management_ip:       {{ src_cluster.hostname }}
+  svm:
+    name:                {{ new_svm_name }} 
+    snapshot_policy:     {{ svm_read_facts.snapshot_policy.name   | default(omit)}}
+    language:            {{ svm_read_facts.language               | default(omit) }}
+    comment:             {{ svm_read_facts.comment                | default(omit) }}
+    max_volumes:         {{ svm_read_facts.max_volumes            | default(omit) }}
+    subtype:             {{ svm_read_facts.subtype                | default(omit) }}
+    ipspace:             {{ svm_read_facts.ipspace.name           | default('Default') }}
+    cifs:
+      name:              {{ svm_read_facts.cifs.name              | default(omit) }}
+    services:
+      nfs:
+        enabled:          {{ svm_read_facts.nfs.enabled | default(omit) }}
+        allowed:          {{ svm_read_facts.nfs.allowed | default(omit) }}
+      fcp:
+        enabled:          {{ svm_read_facts.fcp.enabled | default(omit) }}
+        allowed:          {{ svm_read_facts.fcp.allowed | default(omit) }}
+      iscsi:
+        enabled:          {{ svm_read_facts.iscsi.enabled | default(omit) }}
+        allowed:          {{ svm_read_facts.iscsi.allowed | default(omit) }}
+      nvme:
+        enabled:          {{ svm_read_facts.nvme.enabled | default(omit) }}
+        allowed:          {{ svm_read_facts.nvme.allowed | default(omit) }}
+      s3:
+        allowed:          {{ svm_read_facts.s3.allowed | default(omit) }}
+      cifs:
+        allowed:          {{ svm_read_facts.cifs.allowed | default(omit) }}
+      
+

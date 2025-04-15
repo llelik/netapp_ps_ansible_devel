@@ -1,0 +1,118 @@
+---
+- name: Set connection details dest
+  ansible.builtin.set_fact:
+    dest_auth:          &dest_auth
+      username:         "{{ dest_cluster.username }}"
+      password:         "{{ dest_cluster.password }}"
+      hostname:         "{{ dest_cluster.hostname }}"
+      validate_certs:   false
+      use_rest:         Auto
+  no_log: true
+
+- name: Set connection details source
+  ansible.builtin.set_fact:
+    src_auth:           &src_auth
+      username:         "{{ source_cluster.username }}"
+      password:         "{{ source_cluster.password }}"
+      hostname:         "{{ source_cluster.hostname }}"
+      validate_certs:   false
+      use_rest:         Always
+  no_log: true
+
+# - set_fact:
+#     api_config_list: "{{ api_config_list | default([]) + [ config_api_paths[api_item].path ] }}"
+#   loop: "{{ clone_config }}"
+#   loop_control:
+#     loop_var: api_item
+#   when: api_item in config_api_paths.keys()
+
+# - debug:
+#     msg: "Config list: {{ api_config_list }}"
+
+
+- name: Read SVM source info
+  netapp.ontap.na_ontap_rest_info:
+    <<: *src_auth
+    #use_python_keys:    true
+    gather_subset:      "{{ config_api_paths[api_path_subset].path }}"
+    fields:             "{{ config_api_paths[api_path_subset].fields }}"
+    parameters:
+      name:             "{{ source_cluster.svm }}"
+  register: svm_source_info
+
+- set_fact:
+    source_svm_uuid:   "{{ svm_source_info.ontap_info[config_api_paths[api_path_subset].path].records[0].uuid }}"
+    clean_ontap_facts: "{{ svm_source_info.ontap_info[config_api_paths[api_path_subset].path] | to_json | netapp_ps.ontap_specials.remove_keys(['uuid', '_links'])  }}"
+- set_fact:
+    svm_read_facts: "{{ clean_ontap_facts.records[0] }}"
+- set_fact:
+    vars_defaults: "{{ lookup('template', 'svm.j2') | from_yaml }}"
+    source_cvm_name: "{{ svm_read_facts.name }}"
+
+- name: Read requested SVM configration info
+  include_role: 
+    name: netapp_ps.ontap_specials.svm_clone_get_subset
+  vars:
+    s_cluster:        "{{ source_cluster }}"
+    d_cluster:        "{{ dest_cluster }}"
+    api_path_request: "{{ clone_config }}" 
+
+- name: Render SVM facts
+  set_fact:
+    vars_defaults: "{{ lookup('template', 'svm.j2') | from_yaml }}"
+    source_svm_name: "{{ svm_read_facts.name }}"
+
+    
+    # - name: Create export policy
+    #   netapp.ontap.na_ontap_export_policy:
+    #     state: present
+    #     vserver: "{{ src_cluster.svm }}"
+    #     name: "test_export_policy"
+    #     <<: *src_auth
+
+    # - name: "Add new export rules"
+    #   netapp.ontap.na_ontap_export_policy_rule:
+    #     state: present
+    #     name: "test_export_policy"
+    #     vserver: "{{ src_cluster.svm }}"
+    #     client_match: "{{ item.client_match }}"
+    #     ro_rule: "{{ item.ro_rule }}"
+    #     rw_rule: "{{ item.rw_rule }}"
+    #     protocol: "{{ item.protocol }}"
+    #     super_user_security: "{{ item.super_user_security }}"
+    #     <<: *src_auth
+    #   loop: 
+    #     - { 'name': 'test1', 'client_match': '172.30.0.0/16', 'ro_rule': 'sys', 'rw_rule': 'sys', 'protocol': 'nfs', 'super_user_security': 'none' }
+    #     - { 'name': 'test2', 'client_match': '192.168.0.0/16', 'ro_rule': 'sys', 'rw_rule': 'sys', 'protocol': 'nfs', 'super_user_security': 'none' }
+    #   loop_control:
+    #     label: "{{ item.client_match  }}"
+
+
+    # - name: collect SVM source info
+    #   netapp.ontap.na_ontap_rest_info:
+    #     <<: *src_auth
+    #     use_python_keys: true
+    #     gather_subset: 
+    #       #- "svm/svms"
+    #       # #- "protocols/nfs/export-policies"
+    #       #- snapshot_policy_info
+    #       #- protocols/nfs/services
+    #       - name-services/dns
+    #     fields:
+    #       - '**'
+    #     # owning_resource:
+    #     #   svm_name: "{{ src_cluster.svm }}"
+    #     #   policy_name: "test_export_policy"
+    #     parameters:
+    #       svm.name: "{{ src_cluster.svm }}"
+    #   register: svm_source_info
+
+    # - set_fact:
+    #     svm_source_info_all: "{{ svm_source_info.ontap_info | process_ontap_info }}"
+    #     svm_dest_info_all: "{{ svm_dest_info.ontap_info | process_ontap_info }}"
+
+
+    # - name: show diff
+    #   set_fact:
+    #     svmdiff: "{{ (svm_source_info_all | to_json)  | compare_svm(svm_dest_info_all | to_json, ['aggregates', 'uuid', '_links', 'self', 'href']) }}"
+    
