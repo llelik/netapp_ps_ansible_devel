@@ -1,7 +1,7 @@
 
   {%- if svm_read_data.cifs is defined and svm_read_data.cifs | length > 0 -%}
   cifs:
-    name:                     {{ new_svm_name[:14]                                         | default(omit) }}
+    name:                     'SVMALEXEYMTEST'
     domain:                   {{ svm_read_data.cifs.ad_domain.fqdn                    | default(omit) }}
     ou:                       {{ svm_read_data.cifs.ad_domain.organizational_unit     | default(omit) }}
     session_security:         {{ svm_read_data.cifs.security.session_security         | default(omit) }}

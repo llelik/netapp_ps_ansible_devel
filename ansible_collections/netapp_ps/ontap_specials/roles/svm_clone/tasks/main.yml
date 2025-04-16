@@ -19,16 +19,6 @@
       use_rest:         Always
   no_log: true
 
-# - set_fact:
-#     api_config_list: "{{ api_config_list | default([]) + [ config_api_paths[api_item].path ] }}"
-#   loop: "{{ clone_config }}"
-#   loop_control:
-#     loop_var: api_item
-#   when: api_item in config_api_paths.keys()
-
-# - debug:
-#     msg: "Config list: {{ api_config_list }}"
-
 
 - name: Read SVM source info
   netapp.ontap.na_ontap_rest_info:
@@ -104,57 +94,4 @@
   vars:
     qtask: create_multi
     qchild: clone_source
-    
-    # - name: Create export policy
-    #   netapp.ontap.na_ontap_export_policy:
-    #     state: present
-    #     vserver: "{{ src_cluster.svm }}"
-    #     name: "test_export_policy"
-    #     <<: *src_auth
-
-    # - name: "Add new export rules"
-    #   netapp.ontap.na_ontap_export_policy_rule:
-    #     state: present
-    #     name: "test_export_policy"
-    #     vserver: "{{ src_cluster.svm }}"
-    #     client_match: "{{ item.client_match }}"
-    #     ro_rule: "{{ item.ro_rule }}"
-    #     rw_rule: "{{ item.rw_rule }}"
-    #     protocol: "{{ item.protocol }}"
-    #     super_user_security: "{{ item.super_user_security }}"
-    #     <<: *src_auth
-    #   loop: 
-    #     - { 'name': 'test1', 'client_match': '172.30.0.0/16', 'ro_rule': 'sys', 'rw_rule': 'sys', 'protocol': 'nfs', 'super_user_security': 'none' }
-    #     - { 'name': 'test2', 'client_match': '192.168.0.0/16', 'ro_rule': 'sys', 'rw_rule': 'sys', 'protocol': 'nfs', 'super_user_security': 'none' }
-    #   loop_control:
-    #     label: "{{ item.client_match  }}"
-
-
-    # - name: collect SVM source info
-    #   netapp.ontap.na_ontap_rest_info:
-    #     <<: *src_auth
-    #     use_python_keys: true
-    #     gather_subset: 
-    #       #- "svm/svms"
-    #       # #- "protocols/nfs/export-policies"
-    #       #- snapshot_policy_info
-    #       #- protocols/nfs/services
-    #       - name-services/dns
-    #     fields:
-    #       - '**'
-    #     # owning_resource:
-    #     #   svm_name: "{{ src_cluster.svm }}"
-    #     #   policy_name: "test_export_policy"
-    #     parameters:
-    #       svm.name: "{{ src_cluster.svm }}"
-    #   register: svm_source_info
-
-    # - set_fact:
-    #     svm_source_info_all: "{{ svm_source_info.ontap_info | process_ontap_info }}"
-    #     svm_dest_info_all: "{{ svm_dest_info.ontap_info | process_ontap_info }}"
-
-
-    # - name: show diff
-    #   set_fact:
-    #     svmdiff: "{{ (svm_source_info_all | to_json)  | compare_svm(svm_dest_info_all | to_json, ['aggregates', 'uuid', '_links', 'self', 'href']) }}"
     

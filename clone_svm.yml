@@ -22,7 +22,7 @@
     vars_templates:
     vars_overrides:
     vars_local:
-    qlogname: "create_svm.test"       # log file name prefix
+    qlogname: "create_svm.test"                    # log file name prefix
     qlogdir:  "{{ vars['playbook_dir'] }}/logs"    # log file directory
   vars_files:
     - "{{ vars_absolute_path }}/vars.yml"
@@ -42,6 +42,7 @@
         source_cluster:   "{{ src_cluster }}"
         dest_cluster:     "{{ dst_cluster }}"
         api_path_subset: svm
+        new_svm_name: "{{ dst_cluster.svm }}"
         clone_config:
           # - export_policy
           # - nfs
@@ -52,21 +53,9 @@
           #- unix_user
           # - cifs
           # - iscsi
-        new_svm_name: "{{ dst_cluster.svm }}"
+        
     
     - debug: var=vars_local
-    #- debug: var=vars_defaults
-
-    # - ansible.builtin.include_role:
-    #     name: netapp_ps.ontap.svm
-    #   vars:
-    #     qtask: facts
-    #     qchild: clone_source
-    # - ansible.builtin.include_role: 
-    #     name: netapp_ps.ontap.svm
-    #   vars:
-    #     qtask: create
-    #     qchild: clone_source
 ...
 
 # SVM-level configurations:
