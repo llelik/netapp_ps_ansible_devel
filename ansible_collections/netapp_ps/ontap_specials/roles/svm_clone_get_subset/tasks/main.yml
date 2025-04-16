@@ -36,14 +36,16 @@
   set_fact:
     svm_read_data: "{{ 
                     svm_read_data | default({}) | combine(
-                        { cfg_item: (clean_ontap_facts.results | selectattr('api', 'equalto', cfg_item))[0].ontap_info[config_api_paths[cfg_item].path].records[0] | default({}) }
+                        { cfg_item: (clean_ontap_facts.results | selectattr('api', 'equalto', cfg_item))[0].ontap_info[config_api_paths[cfg_item].path].records | default([])}
                     )
                     }}"
   loop: "{{ clone_config }}"
   loop_control:
     loop_var: cfg_item
 
-- name: Render local vars from APIs
+- name: Render local vars from APIs response on source
   set_fact:
     vars_local:
-      clone_source: "{{ lookup('template', 'locals.j2') | from_yaml }}"
+      clone_source: "{{ lookup('template', 'locals.j2') | from_yaml  }}"
+- debug: var=vars_local
+#- fail: msg=STOP

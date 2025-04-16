@@ -1,0 +1,10 @@
+{%- if svm_read_data.name_mapping is defined and svm_read_data.name_mapping | length > 0 -%}
+name_mapping:
+{% for nm in svm_read_data.name_mapping %}
+  - direction:    {{ nm.direction    | default(omit) }}
+    index:        {{ nm.index        | default(omit) }}
+    pattern:      {{ nm.pattern      | default(omit) }}
+    replacement:  {{ nm.replacement  | default(omit) }}
+    client_match: {{ nm.client_match | default(omit) }}
+{% endfor %}
+{% endif %}

@@ -1,0 +1,30 @@
+{%- if svm_read_data.cifs_shares is defined and svm_read_data.cifs_shares | length > 0 -%}
+cifs_shares:
+{% for cifs_share in svm_read_data.cifs_shares +%}
+  - name:               {{ cifs_share.name }}
+    path:                     {{ cifs_share.path                     | default(omit) }}
+    comment:                  {{ cifs_share.comment                  | default(omit) }}   
+    access_based_enumeration: {{ cifs_share.access_based_enumeration | default(omit) }}
+    show_snapshot:            {{ cifs_share.show_snapshot            | default(omit) }}
+    show_previous_versions:   {{ cifs_share.show_previous_versions   | default(omit) }}
+    oplocks:                  {{ cifs_share.oplocks                  | default(omit) }}
+    home_directory:           {{ cifs_share.home_directory           | default(omit) }}
+    change_notify:            {{ cifs_share.change_notify            | default(omit) }}
+    encryption:               {{ cifs_share.encryption               | default(omit) }}
+    namespace_caching:        {{ cifs_share.namespace_caching        | default(omit) }}
+    continuously_available:   {{ cifs_share.continuously_available   | default(omit) }}
+    cifs_browsable:           {{ cifs_share.browsable                | default(omit) }}
+    allow_unencrypted_access: {{ cifs_share.allow_unencrypted_access | default(omit) }}
+    unix_symlink:             {{ cifs_share.unix_symlink             | default(omit) }}
+    offline_files:            {{ cifs_share.offline_files            | default(omit) }}
+    vscan_fileop_profile:     {{ cifs_share.vscan_profile            | default(omit) }}
+    {%+ if cifs_share.acls is defined and cifs_share.acls | length > 0 +%}
+    acls: {% for acl_item in cifs_share.acls +%}
+        - acl_type:           {{ acl_item.type                       | default(omit) }}
+          user_or_group:      {{ acl_item.user_or_group              | default(omit) }}
+          permission:         {{ acl_item.permission                | default(omit) }}
+          {% endfor %}
+    {% endif %}
+{% endfor %}
+{% endif %}
+    

@@ -1,0 +1,9 @@
+{%- if svm_read_data.unix_user is defined and svm_read_data.unix_user | length > 0 -%}
+unix_user:
+{% for user in svm_read_data.unix_user %}
+  - name:      {{ user.name          | default(omit) }}
+    full_name: {{ user.full_name     | default(omit) }}
+    group_id:  {{ user.primary_gid   | default(omit) }}
+    id:        {{ user.id            | default(omit) }}
+{% endfor %}
+{% endif %}

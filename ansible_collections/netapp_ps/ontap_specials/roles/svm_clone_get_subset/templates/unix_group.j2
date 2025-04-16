@@ -1,0 +1,8 @@
+{%- if svm_read_data.unix_group is defined and svm_read_data.unix_group | length > 0 -%}
+unix_group:
+{% for group in svm_read_data.unix_group %}
+  - name:  {{ group.name      | default(omit) }}
+    users: {{ group.full_name | default(omit) }}
+    id:    {{ group.id        | default(omit) }}
+{% endfor %}
+{% endif %}

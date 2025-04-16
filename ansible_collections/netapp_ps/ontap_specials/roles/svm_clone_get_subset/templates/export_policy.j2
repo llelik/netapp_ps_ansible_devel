@@ -1,0 +1,17 @@
+export_policy:
+{% for ep in svm_read_data.export_policy %}
+    - name:  {{ ep.name | default(omit) }}
+      rules: {% for rule in ep.rules | default([]) %}    
+        - allow_device_creation: {{ rule.allow_device_creation | default(omit) }}
+          allow_suid:            {{ rule.allow_suid            | default(omit) }}
+          anonymous_user_id:     {{ rule.anonymous_user        | default(omit) }}
+          chown_mode:            {{ rule.chown_mode            | default(omit) }}
+          protocol:              {{ rule.protocols             | default(omit) }}
+          ro_rule:               {{ rule.ro_rule               | default(omit) }}
+          rw_rule:               {{ rule.rw_rule               | default(omit) }}
+          rule_index:            {{ rule.index                 | default(omit) }}
+          super_user_security:   {{ rule.superuser   | default(omit) }}
+          client_match:          {{ rule.clients | map(attribute='match') | join(',')             | default(omit) }}
+        {% endfor %}
+
+{% endfor %}

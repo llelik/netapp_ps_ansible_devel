@@ -2,4 +2,4 @@
 ## Naming facts
 - name: Merge Extravars
   ansible.builtin.set_fact:
-    snapmirrors : "{{ 'snapmirrors' | merge_lists(v=vars_local,c=qtask_child) }}"
+    snapmirrors : "{{ 'snapmirrors' | netapp_ps.maf.merge_lists(v=vars_local,c=qtask_child) }}"

@@ -43,24 +43,30 @@
         dest_cluster:     "{{ dst_cluster }}"
         api_path_subset: svm
         clone_config:
-          - nfs
+          # - export_policy
+          # - nfs
+          #- name_mapping
           - cifs
-          - iscsi
+          - cifs_shares
+          #- unix_group
+          #- unix_user
+          # - cifs
+          # - iscsi
         new_svm_name: "{{ dst_cluster.svm }}"
     
     - debug: var=vars_local
-    - debug: var=vars_defaults
+    #- debug: var=vars_defaults
 
-    - ansible.builtin.include_role:
-        name: netapp_ps.ontap.svm
-      vars:
-        qtask: facts
-        qchild: clone_source
-    - ansible.builtin.include_role: 
-        name: netapp_ps.ontap.svm
-      vars:
-        qtask: create
-        qchild: souclone_sourcerce 
+    # - ansible.builtin.include_role:
+    #     name: netapp_ps.ontap.svm
+    #   vars:
+    #     qtask: facts
+    #     qchild: clone_source
+    # - ansible.builtin.include_role: 
+    #     name: netapp_ps.ontap.svm
+    #   vars:
+    #     qtask: create
+    #     qchild: clone_source
 ...
 
 # SVM-level configurations:

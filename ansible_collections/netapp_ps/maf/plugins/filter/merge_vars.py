@@ -64,7 +64,7 @@ class FilterModule(object):
        # grab the global template name
       template_name_global   = external.get("template","")                                                           # global template name
       # grab the local template name
-      template_name_local    = local.get("template",None) or external.get(object_name+s,{}).get("template","")       # object template name (local or external, local wins)
+      template_name_local    = local.get("template",None) #or external.get(object_name+s,{}).get("template","")       # object template name (local or external, local wins)
       # grab the global template object
       template_object_global = templates.get(template_name_global,{}).get(object_name+s,{})                          # global template values
       # grab the local template object

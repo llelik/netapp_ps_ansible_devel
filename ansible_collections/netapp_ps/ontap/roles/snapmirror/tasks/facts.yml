@@ -3,7 +3,7 @@
 - name: Merge Extravars
   ansible.builtin.set_fact:
     # we add a local var snapmirror_item, multi is enabled
-    snapmirror : "{{ 'snapmirror' | netapp_ps.ontap.merge_vars(d=vars_defaults,t=vars_templates,v=vars_local,l=snapmirror_item,o=vars_overrides,c=qtask_child,s=qtask_suffix) }}"
+    snapmirror : "{{ 'snapmirror' | netapp_ps.maf.merge_vars(d=vars_defaults,t=vars_templates,v=vars_local,l=snapmirror_item,o=vars_overrides,c=qtask_child,s=qtask_suffix) }}"
 
 - name: Set naming facts
   no_log: true
@@ -20,4 +20,4 @@
 - name: Set naming facts - authentication
   no_log: true
   set_fact:
-    auth_rest: "{{ netapp_hostname | netapp_ps.ontap.auth_rest(netapp_username,netapp_password,netapp_api_certificate_base,netapp_api_use_certificate) }}"
+    auth_rest: "{{ netapp_hostname | netapp_ps.maf.auth_rest(netapp_username,netapp_password,netapp_api_certificate_base,netapp_api_use_certificate) }}"

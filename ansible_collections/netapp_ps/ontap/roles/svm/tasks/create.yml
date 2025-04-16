@@ -14,8 +14,8 @@
 
   # logging
   - set_fact:
-      l_cluster:    "{{ cluster    | to_nice_yaml(2) | indent(2,true) | netapp_ps.ontap.do_log('ontap/svm/create','cluster',qlogdir,qlogname) }}"
-      l_svm:        "{{ svm        | to_nice_yaml(2) | indent(2,true) | netapp_ps.ontap.do_log('','svm',qlogdir,qlogname) }}"
+      l_cluster:    "{{ cluster    | to_nice_yaml(2) | indent(2,true) | netapp_ps.maf.do_log('ontap/svm/create','cluster',qlogdir,qlogname) }}"
+      l_svm:        "{{ svm        | to_nice_yaml(2) | indent(2,true) | netapp_ps.maf.do_log('','svm',qlogdir,qlogname) }}"
 
     ## Create svm
   # - name: "Create Svm [{{ svm.name }}]"      
@@ -188,7 +188,8 @@
     ## We call the create.yml task from the cifs role
     ## All objects like cifs/svm/cluster are already set and merged in this parent role
   - name: "Enable cifs [{{ svm.name }}]"      
-    include_tasks: "{{ playbook_dir }}/roles/ontap/cifs/tasks/create.yml"
+    include_role:
+      name: netapp_ps.ontap.cifs
     when: 
     - cifs.name | default(false)
     - ((svm.services | default({})).cifs | default({})).allowed | default(false)

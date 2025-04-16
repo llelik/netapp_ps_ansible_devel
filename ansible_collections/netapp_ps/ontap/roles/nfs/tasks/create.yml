@@ -1,6 +1,9 @@
 
 ---
 - name: "Role - ontap/nfs/create"
+  delegate_to: localhost
+  when: 
+    - svm.name | default(false)
   block:
   - set_fact:
       auth: &auth
@@ -15,26 +18,76 @@
 
   # logging
   - set_fact:
-      l_cluster: "{{ cluster | to_nice_yaml(2) | indent(2,true) | netapp_ps.ontap.do_log('ontap/nfs/create','cluster',qlogdir,qlogname) }}"
-      l_svm:     "{{ svm     | to_nice_yaml(2) | indent(2,true) | netapp_ps.ontap.do_log('','svm',qlogdir,qlogname) }}"
-      l_nfs:     "{{ nfs     | to_nice_yaml(2) | indent(2,true) | netapp_ps.ontap.do_log('','nfs',qlogdir,qlogname) }}"
+      l_cluster: "{{ cluster | to_nice_yaml(2) | indent(2,true) | netapp_ps.maf.do_log('ontap/nfs/create','cluster',qlogdir,qlogname) }}"
+      l_svm:     "{{ svm     | to_nice_yaml(2) | indent(2,true) | netapp_ps.maf.do_log('','svm',qlogdir,qlogname) }}"
+      l_nfs:     "{{ nfs     | to_nice_yaml(2) | indent(2,true) | netapp_ps.maf.do_log('','nfs',qlogdir,qlogname) }}"
 
-  - name: "Enable nfs"      
+  - name: "Enable and configure NFS"      
     netapp.ontap.na_ontap_nfs:
-      state            : present
-      vserver          : "{{ svm.name }}"
-      showmount        : "{{ nfs.showmount          | default(omit) }}"
-      nfsv3            : "{{ nfs.nfsv3              | default(omit) }}"
-      nfsv3_fsid_change: "{{ nfs.nfsv3_fsid_change  | default(omit) }}"
-      nfsv4            : "{{ nfs.nfsv4              | default(omit) }}"
-      nfsv41           : "{{ nfs.nfsv41             | default(omit) }}"
-      nfsv41_acl       : "{{ nfs.nfsv41_acl         | default(omit) }}"
-      nfsv41_pnfs      : "{{ nfs.nfsv41_pnfs        | default(omit) }}"
-      tcp_max_xfer_size: "{{ nfs.tcp_max_xfer_size  | default(omit) }}"
-      nfsv4_id_domain  : "{{ nfs.nfsv4_id_domain    | default(omit) }}"
-      vstorage_state   : "{{ nfs.vstorage_state     | default(omit) }}"
-      service_state    : "started"
+      state: present
+      vserver:                           "{{ svm.name }}"
+      showmount:                         "{{ nfs.showmount                               | default(omit) }}"
+      nfsv3:                             "{{ nfs.nfsv3                                   | default(omit) }}"
+      nfsv3_fsid_change:                 "{{ nfs.nfsv3_fsid_change                       | default(omit) }}"
+      nfsv4:                             "{{ nfs.nfsv4                                   | default(omit) }}"
+      nfsv4_id_domain:                   "{{ nfs.nfsv4_id_domain                         | default(omit) }}"
+      #nfsv4_fsid_change:                 "{{ nfs.nfsv4_fsid_change                       | default(omit) }}"  ZAPI
+      nfsv40_acl:                        "{{ nfs.nfsv40_acl                              | default(omit) }}"
+      nfsv40_read_delegation:            "{{ nfs.nfsv40_read_delegation                  | default(omit) }}"
+      nfsv40_write_delegation:           "{{ nfs.nfsv40_write_delegation                 | default(omit) }}"
+      #nfsv40_referrals:                  "{{ nfs.nfsv40_referrals                        | default(omit) }}"  ZAPI
+      nfsv41:                            "{{ nfs.nfsv41                                  | default(omit) }}"
+      nfsv41_acl:                        "{{ nfs.nfsv41_acl                              | default(omit) }}"
+      nfsv41_pnfs:                       "{{ nfs.nfsv41_pnfs                             | default(omit) }}"
+      tcp_max_xfer_size:                 "{{ nfs.tcp_max_xfer_size                       | default(omit) }}"
+      tcp:                               "{{ nfs.tcp                                     | default(omit) }}"
+      udp:                               "{{ nfs.udp                                     | default(omit) }}"
+      windows:
+        default_user:                    "{{ nfs.windows.default_user                    | default(omit) }}"
+        map_unknown_uid_to_default_user: "{{ nfs.windows.map_unknown_uid_to_default_user | default(omit) }}"
+        v3_ms_dos_client_enabled:        "{{ nfs.windows.v3_ms_dos_client_enabled        | default(omit) }}"
+      vstorage_state:                    "{{ nfs.vstorage_state                          | default(omit) }}"
+      root:
+        ignore_nt_acl:                   "{{ nfs.root.ignore_nt_acl                      | default(omit) }}"
+        skip_write_permission_check:     "{{ nfs.root.skip_write_permission_check        | default(omit) }}"
+      security:
+        chown_mode:                      "{{ nfs.security.chown_mode                     | default(omit) }}"
+        nt_acl_display_permission:       "{{ nfs.security.nt_acl_display_permission      | default(omit) }}"
+        ntfs_unix_security:              "{{ nfs.security.ntfs_unix_security             | default(omit) }}"
+        permitted_encryption_types:      "{{ nfs.security.permitted_encryption_types     | default(omit) }}"
+        rpcsec_context_idle:             "{{ nfs.security.rpcsec_context_idle            | default(omit) }}"
+      service_state:                     "started"
       <<: *auth
-    delegate_to: localhost
-  when: 
-  - svm.name | default(false)
+
+  # get the svm uuid for further operations
+  - name: Get vserver uuid
+    netapp.ontap.na_ontap_restit:
+      api: /svm/svms
+      method: GET
+      query:
+        name: "{{ svm.name }}"
+      <<: *auth
+    register: svm_info
+    # when: 
+    # - svm.subtype | default('default') == 'default'
+
+  - name: "Configure other NFS parameters (using restit) [{{ svm.name }}]"
+    netapp.ontap.na_ontap_restit:
+      api: "/protocols/nfs/services/{{ svm_info.response.records[0].uuid }}"
+      method: PATCH
+      body:
+        # NOT YET PATCHABLE - use ZAPI
+        # protocol:
+        #   v4_fsid_change:                      "{{ nfs.nfsv4_fsid_change                            | default(omit) }}"
+        #   v40_features:
+        #     referrals_enabled:                       "{{ nfs.nfsv40_referrals                             | default(omit) }}"
+        exports:
+          name_service_lookup_protocol:         "{{ nfs.exports.name_service_lookup_protocol         | default(omit) }}"
+          netgroup_trust_any_nsswitch_no_match: "{{ nfs.exports.netgroup_trust_any_nsswitch_no_match | default(omit) }}"
+      <<: *auth
+    
+    # when: 
+    # - svm_info.response.num_records | default(0) > 0
+    # - svm.subtype | default('default') == 'default'
+  
+...

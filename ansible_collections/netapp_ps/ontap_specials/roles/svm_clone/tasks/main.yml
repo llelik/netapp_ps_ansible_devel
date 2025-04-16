@@ -43,11 +43,9 @@
 - set_fact:
     source_svm_uuid:   "{{ svm_source_info.ontap_info[config_api_paths[api_path_subset].path].records[0].uuid }}"
     clean_ontap_facts: "{{ svm_source_info.ontap_info[config_api_paths[api_path_subset].path] | to_json | netapp_ps.ontap_specials.remove_keys(['uuid', '_links'])  }}"
+
 - set_fact:
     svm_read_facts: "{{ clean_ontap_facts.records[0] }}"
-- set_fact:
-    vars_defaults: "{{ lookup('template', 'svm.j2') | from_yaml }}"
-    source_cvm_name: "{{ svm_read_facts.name }}"
 
 - name: Read requested SVM configration info
   include_role: 
@@ -55,13 +53,57 @@
   vars:
     s_cluster:        "{{ source_cluster }}"
     d_cluster:        "{{ dest_cluster }}"
-    api_path_request: "{{ clone_config }}" 
+    api_path_request: "{{ clone_config }}"
+    source_svm_uuid: "{{ source_svm_uuid }}"
 
 - name: Render SVM facts
   set_fact:
     vars_defaults: "{{ lookup('template', 'svm.j2') | from_yaml }}"
     source_svm_name: "{{ svm_read_facts.name }}"
 
+- ansible.builtin.include_role:
+    name: netapp_ps.ontap.svm
+  vars:
+    qtask: facts
+    qchild: clone_source
+- ansible.builtin.include_role: 
+    name: netapp_ps.ontap.svm
+  vars:
+    qtask: create
+    qchild: clone_source
+
+- ansible.builtin.include_role: 
+    name: netapp_ps.ontap.export_policy
+  vars:
+    qtask: facts_multi
+    qchild: clone_source
+- ansible.builtin.include_role: 
+    name: netapp_ps.ontap.export_policy
+  vars:
+    qtask: create_multi
+    qchild: clone_source
+
+- ansible.builtin.include_role: 
+    name: netapp_ps.ontap.cifs
+  vars:
+    qtask: facts
+    qchild: clone_source
+- ansible.builtin.include_role: 
+    name: netapp_ps.ontap.cifs
+  vars:
+    qtask: create
+    qchild: clone_source
+
+- ansible.builtin.include_role: 
+    name: netapp_ps.ontap.cifs_share
+  vars:
+    qtask: facts_multi
+    qchild: clone_source
+- ansible.builtin.include_role: 
+    name: netapp_ps.ontap.cifs_share
+  vars:
+    qtask: create_multi
+    qchild: clone_source
     
     # - name: Create export policy
     #   netapp.ontap.na_ontap_export_policy:

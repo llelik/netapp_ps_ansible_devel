@@ -2,8 +2,8 @@
 ## Naming facts
 - name: Merge Extravars
   ansible.builtin.set_fact:
-    snapshot_policy : "{{ 'snapshot_policy' | netapp_ps.ontap.merge_vars(d=vars_defaults,t=vars_templates,v=vars_local,o=vars_overrides,c=qtask_child,s=qtask_suffix) }}"
-    cluster         : "{{ 'cluster'         | netapp_ps.ontap.merge_vars(d=vars_defaults,t=vars_templates,v=vars_local,o=vars_overrides,c=qtask_child) }}"
+    snapshot_policy : "{{ 'snapshot_policy' | netapp_ps.maf.merge_vars(d=vars_defaults,t=vars_templates,v=vars_local,o=vars_overrides,c=qtask_child,s=qtask_suffix) }}"
+    cluster         : "{{ 'cluster'         | netapp_ps.maf.merge_vars(d=vars_defaults,t=vars_templates,v=vars_local,o=vars_overrides,c=qtask_child) }}"
 
 - name: Set naming facts
   no_log: true
@@ -20,4 +20,4 @@
 - name: Set naming facts - authentication
   no_log: true
   set_fact:
-    auth_rest: "{{ netapp_hostname | auth_rest(netapp_username,netapp_password,netapp_api_certificate_base,netapp_api_use_certificate) }}"
+    auth_rest: "{{ netapp_hostname | netapp_ps.maf.auth_rest(netapp_username,netapp_password,netapp_api_certificate_base,netapp_api_use_certificate) }}"

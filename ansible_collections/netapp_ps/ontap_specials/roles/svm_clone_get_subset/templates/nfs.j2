@@ -1,12 +1,38 @@
-  nfs:
-    showmount:         {{ svm_read_data.nfs.showmount_enabled                           | netapp_ps.ontap_specials.enabled_disabled   | default(omit) }}
-    nfsv3:             {{ svm_read_data.nfs.protocol.v3_enabled                         | netapp_ps.ontap_specials.enabled_disabled   | default(omit) }}
-    nfsv3_fsid_change: {{ svm_read_data.nfs.protocol.v3_fsid_change                     | netapp_ps.ontap_specials.enabled_disabled   | default(omit) }}
-    nfsv4:             {{ svm_read_data.nfs.protocol.v40_enabled                        | netapp_ps.ontap_specials.enabled_disabled   | default(omit) }}
-    nfsv41:            {{ svm_read_data.nfs.protocol.v41_enabled                        | netapp_ps.ontap_specials.enabled_disabled   | default(omit) }}
-    nfsv41_acl:        {{ svm_read_data.nfs.protocol.v41_features.acl_enabled           | netapp_ps.ontap_specials.enabled_disabled   | default(omit) }}
-    nfsv41_pnfs:       {{ svm_read_data.nfs.protocol.v41_features.pnfs_enabled          | netapp_ps.ontap_specials.enabled_disabled   | default(omit) }}
-    vstorage_state:    {{ svm_read_data.nfs.vstorage_enabled                            | netapp_ps.ontap_specials.enabled_disabled   | default(omit) }}
-    nfsv4_id_domain:   {{ svm_read_data.nfs.protocol.v41_features.implementation_domain | default(omit) }}
-    tcp_max_xfer_size: {{ svm_read_data.nfs.transport.tcp_max_transfer_size             | default(omit) }}
-    
+{%- if svm_read_data.nfs is defined and svm_read_data.nfs | length > 0 -%}
+
+nfs:
+  showmount:                            {{ svm_read_data.nfs[0].showmount_enabled                              | netapp_ps.ontap_specials.enabled_disabled   | default(omit) }}
+  nfsv3:                                {{ svm_read_data.nfs[0].protocol.v3_enabled                            | netapp_ps.ontap_specials.enabled_disabled   | default(omit) }}
+  nfsv3_fsid_change:                    {{ svm_read_data.nfs[0].protocol.v3_features.v3_fsid_change            | netapp_ps.ontap_specials.enabled_disabled   | default(omit) }}
+  nfsv4:                                {{ svm_read_data.nfs[0].protocol.v40_enabled                           | netapp_ps.ontap_specials.enabled_disabled   | default(omit) }}
+  nfsv41:                               {{ svm_read_data.nfs[0].protocol.v41_enabled                           | netapp_ps.ontap_specials.enabled_disabled   | default(omit) }}
+  nfsv41_acl:                           {{ svm_read_data.nfs[0].protocol.v41_features.acl_enabled              | netapp_ps.ontap_specials.enabled_disabled   | default(omit) }}
+  nfsv41_pnfs:                          {{ svm_read_data.nfs[0].protocol.v41_features.pnfs_enabled             | netapp_ps.ontap_specials.enabled_disabled   | default(omit) }}
+  vstorage_state:                       {{ svm_read_data.nfs[0].vstorage_enabled                               | netapp_ps.ontap_specials.enabled_disabled   | default(omit) }}
+  nfsv4_fsid_change:                    {{ svm_read_data.nfs[0].protocol.v4_fsid_change                        | netapp_ps.ontap_specials.enabled_disabled   | default(omit) }}
+  nfsv40_acl:                           {{ svm_read_data.nfs[0].protocol.v40_features.acl_enabled              | netapp_ps.ontap_specials.enabled_disabled   | default(omit) }}
+  nfsv40_read_delegation:               {{ svm_read_data.nfs[0].protocol.v40_features.read_delegation_enabled  | netapp_ps.ontap_specials.enabled_disabled   | default(omit) }}
+  nfsv40_write_delegation:              {{ svm_read_data.nfs[0].protocol.v40_features.write_delegation_enabled | netapp_ps.ontap_specials.enabled_disabled   | default(omit) }}
+  nfsv40_referrals:                     {{ svm_read_data.nfs[0].protocol.v40_features.referrals_enabled        | netapp_ps.ontap_specials.enabled_disabled   | default(omit) }}
+  tcp:                                  {{ svm_read_data.nfs[0].transport.tcp_enabled                          | netapp_ps.ontap_specials.enabled_disabled   | default(omit) }}
+  udp:                                  {{ svm_read_data.nfs[0].transport.udp_enabled                          | netapp_ps.ontap_specials.enabled_disabled   | default(omit) }}
+  tcp_max_xfer_size:                    {{ svm_read_data.nfs[0].transport.tcp_max_transfer_size                | default(omit) }}
+  nfsv4_id_domain:                      {{ svm_read_data.nfs[0].protocol.v41_features.implementation_domain    | default(omit) }}
+  windows:
+    default_user:                       {{ svm_read_data.nfs[0].windows.default_user                           | default(omit) }}
+    map_unknown_uid_to_default_user:    {{ svm_read_data.nfs[0].windows.map_unknown_uid_to_default_user        | default(omit) }}
+    v3_ms_dos_client_enabled:           {{ svm_read_data.nfs[0].windows.v3_ms_dos_client_enabled               | default(omit) }}
+  root:
+    ignore_nt_acl:                      {{ svm_read_data.nfs[0].root.ignore_nt_acl                             | default(omit) }}
+    skip_write_permission_check:        {{ svm_read_data.nfs[0].root.skip_write_permission_check               | default(omit) }}
+  security:
+    chown_mode:                         {{ svm_read_data.nfs[0].security.chown_mode                            | default(omit) }}
+    nt_acl_display_permission:          {{ svm_read_data.nfs[0].security.nt_acl_display_permission             | default(omit) }}
+    ntfs_unix_security:                 {{ svm_read_data.nfs[0].security.ntfs_unix_security                    | default(omit) }}
+    permitted_encryption_types:         {{ svm_read_data.nfs[0].security.permitted_encryption_types            | default(omit) }}
+    rpcsec_context_idle:                {{ svm_read_data.nfs[0].security.rpcsec_context_idle                   | default(omit) }}
+  exports:
+    name_service_lookup_protocol:         {{ svm_read_data.nfs[0].exports.name_service_lookup_protocol         | default(omit) }}
+    netgroup_trust_any_nsswitch_no_match: {{ svm_read_data.nfs[0].exports.netgroup_trust_any_nsswitch_no_match | default(omit) }}
+
+{% endif %}

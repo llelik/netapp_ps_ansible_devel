@@ -14,8 +14,8 @@
 
   # logging
   - set_fact:
-      l_cluster: "{{ cluster | to_nice_yaml(2) | indent(2,true) | netapp_ps.ontap.do_log('ontap/iscsi/create','cluster',qlogdir,qlogname) }}"
-      l_svm: "{{ svm | to_nice_yaml(2) | indent(2,true) | netapp_ps.ontap.do_log('','svm',qlogdir,qlogname) }}"
+      l_cluster: "{{ cluster | to_nice_yaml(2) | indent(2,true) | netapp_ps.maf.do_log('ontap/iscsi/create','cluster',qlogdir,qlogname) }}"
+      l_svm:     "{{ svm     | to_nice_yaml(2) | indent(2,true) | netapp_ps.maf.do_log('','svm',qlogdir,qlogname) }}"
 
   - name: "Enable iscsi" 
     netapp.ontap.na_ontap_iscsi:

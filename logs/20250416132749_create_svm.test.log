@@ -1,0 +1,56 @@
+
+
+ontap/export_policy/create
+--------------------------
+cluster:
+  management_ip: jamaica.muccbc.hq.netapp.com
+  name: jamaica
+
+svm:
+  cifs: {}
+  ipspace: Default
+  language: c.utf_8
+  name: svm_alexeym300_clone
+  services:
+    cifs:
+      allowed: false
+    fcp:
+      allowed: false
+      enabled: false
+    iscsi:
+      allowed: true
+      enabled: true
+    nfs:
+      allowed: true
+      enabled: true
+    nvme:
+      allowed: false
+      enabled: false
+    s3: {}
+  snapshot_policy: default
+  subtype: default
+
+export_policy:
+  name: test_export_policy
+  rules:
+  - allow_device_creation: true
+    allow_suid: true
+    anonymous_user_id: 65534
+    chown_mode: restricted
+    client_match: 172.30.0.0/16,10.10.10.0/24
+    ro_rule:
+    - sys
+    rule_index: 1
+    rw_rule:
+    - sys
+  - allow_device_creation: true
+    allow_suid: true
+    anonymous_user_id: 65534
+    chown_mode: restricted
+    client_match: 192.168.0.0/16
+    ro_rule:
+    - sys
+    rule_index: 2
+    rw_rule:
+    - sys
+

@@ -31,12 +31,7 @@ config_api_paths:
       path: "protocols/nfs/export-policies"
       fields:
       - name
-      - rules
-      - rules.client_match
-      - rules.ro_rule
-      - rules.rw_rule
-      - rules.protocol
-      - rules.super_user_security
+      - rules #dict
   nfs:
       path: "protocols/nfs/services"
       fields:
@@ -76,13 +71,16 @@ config_api_paths:
       - protocol.v40_enabled
       - protocol_access_rules      #dict
       - security                   #dict
+      - windows                    #dict
+      - exports.name_service_lookup_protocol 
+      - exports.netgroup_trust_any_nsswitch_no_match 
 
   iscsi:
       path: "protocols/san/iscsi/services"
       fields:
         - target.alias
         - target.name
-  cifs:
+  cifs:       ################ TODO
       path: "protocols/cifs/services"
       fields:
         - enabled
@@ -105,9 +103,59 @@ config_api_paths:
         - security.aes_netlogon_enabled
         - security.use_ldaps 
         - group_policy_object_enabled 
-  cifs_privileges:
+  cifs_privilege:     ################ TODO
       path: "protocols/cifs/users-and-groups/privileges"
       #cifs.administrators
       fields:
         - name
         - privileges
+  cifs_shares:
+      path: "protocols/cifs/shares"
+      fields:
+        - max_connections_per_share 
+        - access_based_enumeration
+        - unix_symlink
+        - dir_umask 
+        - attribute_cache 
+        - file_umask 
+        - acls                  #dict
+        - browsable
+        - home_directory
+        - allow_unencrypted_access
+        - oplocks
+        - no_strict_security 
+        - force_group_for_create 
+        - volume.name
+        - change_notify
+        - name
+        - path
+        - encryption
+        - vscan_profile 
+        - offline_files 
+        - comment
+        - show_snapshot 
+        - show_previous_versions
+        - continuously_available
+        - namespace_caching
+  name_mapping:
+      path: "name-services/name-mappings"
+      fields:
+        - direction
+        - pattern
+        - index
+        - client_match
+        - replacement
+  unix_group:
+      path: "name-services/unix-groups"
+      fields:
+        - name
+        - id
+        - users
+  unix_user:
+      path: "name-services/unix-users"
+      fields:
+        - name
+        - id
+        - primary_gid
+        - full_name
+

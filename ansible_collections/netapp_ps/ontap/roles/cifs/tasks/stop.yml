@@ -14,9 +14,9 @@
 
   # logging
   - set_fact:
-      l_cluster: "{{ cluster | to_nice_yaml(2) | indent(2,true) | do_log('ontap/cifs/stop','cluster',qlogname) }}"
-      l_svm:     "{{ svm     | to_nice_yaml(2) | indent(2,true) | do_log('','svm',qlogname) }}"
-      l_cifs:    "{{ cifs    | to_nice_yaml(2) | indent(2,true) | do_log('','cifs',qlogname) }}"
+      l_cluster: "{{ cluster | to_nice_yaml(2) | indent(2,true) | netapp_ps.maf.do_log('ontap/cifs/stop','cluster',qlogname) }}"
+      l_svm:     "{{ svm     | to_nice_yaml(2) | indent(2,true) | netapp_ps.maf.do_log('','svm',qlogname) }}"
+      l_cifs:    "{{ cifs    | to_nice_yaml(2) | indent(2,true) | netapp_ps.maf.do_log('','cifs',qlogname) }}"
 
     ## Enable Cifs
   - name: "Enable cifs"      

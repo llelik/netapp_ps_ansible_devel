@@ -14,9 +14,9 @@
 
   # logging
   - set_fact:
-      l_cluster: "{{ cluster | to_nice_yaml(2) | indent(2,true) | netapp_ps.ontap.do_log('ontap/export_policy/create','cluster',qlogdir,qlogname) }}"
-      l_svm: "{{ svm | to_nice_yaml(2) | indent(2,true) | netapp_ps.ontap.do_log('','svm',qlogdir,qlogname) }}"
-      l_export_policy: "{{ export_policy | to_nice_yaml(2) | indent(2,true) | netapp_ps.ontap.do_log('','export_policy',qlogdir,qlogname) }}"
+      l_cluster:       "{{ cluster       | to_nice_yaml(2) | indent(2,true) | netapp_ps.maf.do_log('ontap/export_policy/create','cluster',qlogdir,qlogname) }}"
+      l_svm:           "{{ svm           | to_nice_yaml(2) | indent(2,true) | netapp_ps.maf.do_log('','svm',qlogdir,qlogname) }}"
+      l_export_policy: "{{ export_policy | to_nice_yaml(2) | indent(2,true) | netapp_ps.maf.do_log('','export_policy',qlogdir,qlogname) }}"
 
     ## Delete rules labeled as deleted
   - name: "Delete rules"

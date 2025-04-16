@@ -14,9 +14,9 @@
 
   # logging
   - set_fact:
-      l_cluster: "{{ cluster | to_nice_yaml(2) | indent(2,true) | do_log('ontap/cifs/create','cluster',qlogname) }}"
-      l_svm:     "{{ svm     | to_nice_yaml(2) | indent(2,true) | do_log('','svm',qlogname) }}"
-      l_cifs:    "{{ cifs    | to_nice_yaml(2) | indent(2,true) | do_log('','cifs',qlogname) }}"
+      l_cluster: "{{ cluster | to_nice_yaml(2) | indent(2,true) | netapp_ps.maf.do_log('ontap/cifs/create','cluster',qlogdir,qlogname) }}"
+      l_svm:     "{{ svm     | to_nice_yaml(2) | indent(2,true) | netapp_ps.maf.do_log('','svm',qlogdir,qlogname) }}"
+      l_cifs:    "{{ cifs    | to_nice_yaml(2) | indent(2,true) | netapp_ps.maf.do_log('','cifs',qlogdir,qlogname) }}"
 
     ## Enable Cifs
   - name: "Enable cifs"      
@@ -24,10 +24,10 @@
       state                   : present
       vserver                 : "{{ svm.name }}"
       name                    : "{{ cifs.name }}"
-      admin_user_name         : "{{ ad_username }}"     # need to be processed in the credentials step !
-      admin_password          : "{{ ad_password }}"
-      domain                  : "{{ cifs.domain }}"
-      ou                      : "{{ cifs.ou }}"
+      admin_user_name         : "{{ ad_username | default(omit)}}"     # need to be processed in the credentials step !
+      admin_password          : "{{ ad_password | default(omit)}}"     # TODO
+      domain                  : "{{ cifs.domain | default(omit)}}"     # TODO
+      ou                      : "{{ cifs.ou | default(omit)}}"         # TODO
       session_security        : "{{ cifs.session_security         | default(omit) }}"
       smb_encryption          : "{{ cifs.smb_encryption           | default(omit) }}"
       smb_signing             : "{{ cifs.smb_signing              | default(omit) }}"
@@ -44,7 +44,7 @@
       service_state           : "started"
       force                   : True
       <<: *auth
-    no_log: true
+    no_log: false
     delegate_to: localhost
 
     ## Set cifs options with no rest support
