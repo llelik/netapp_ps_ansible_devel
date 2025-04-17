@@ -1,5 +1,8 @@
 ---
 - name: "Role - ontap/unix_user/create"
+  when: 
+    - svm.name | default(false)
+    - unix_user_item.name | default(false)
   block:
   - set_fact:
       auth: &auth
@@ -19,16 +22,14 @@
       l_unix_user: "{{ unix_user | to_nice_yaml(2) | indent(2,true) | netapp_ps.maf.do_log('','unix_user',qlogdir,qlogname) }}" 
 
   # Create Unix User
-  - name: "Create Unix User [{{ unix_user.name }}]"       
+  - name: "Create Unix User [{{ unix_user_item.name }}]"       
     netapp.ontap.na_ontap_unix_user:
       state    : present
       vserver  : "{{ svm.name }}"
-      name     : "{{ unix_user.name       | default(omit) }}"
-      full_name: "{{ unix_user.full_name  | default(omit)}}"
-      group_id : "{{ unix_user.group_id   | default(omit)}}"
-      id       : "{{ unix_user.id         | default(omit)}}"
+      name     : "{{ unix_user_item.name       | default(omit) }}"
+      full_name: "{{ unix_user_item.full_name  | default(omit)}}"
+      group_id : "{{ unix_user_item.group_id   | default(omit)}}"
+      id       : "{{ unix_user_item.id         | default(omit)}}"
       <<: *auth
     delegate_to: localhost
-  when: 
-  - svm.name | default(false)
-  - unix_user.name | default(false)
+  

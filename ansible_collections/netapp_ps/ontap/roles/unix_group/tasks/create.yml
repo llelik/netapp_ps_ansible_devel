@@ -1,5 +1,7 @@
 ---
 - name: "Role - ontap/unix_group/create"
+  when: 
+    - unix_group_item.name | default(false)
   block:
   - set_fact:
       auth: &auth
@@ -18,16 +20,14 @@
       l_svm:        "{{ svm        | to_nice_yaml(2) | indent(2,true) | netapp_ps.maf.do_log('','svm',qlogdir,qlogname) }}"
       l_unix_group: "{{ unix_group | to_nice_yaml(2) | indent(2,true) | netapp_ps.maf.do_log('','unix_group',qlogdir,qlogname) }}"   
 
-  - name: "Create Unix Group [{{ unix_group.name | default('None') }}]"       
+  - name: "Create Unix Group [{{ unix_group_item.name | default('None') }}]"       
     netapp.ontap.na_ontap_unix_group:
       state    : present
       vserver  : "{{ svm.name }}"
-      name     : "{{ unix_group.name }}"
-      users    : "{{ unix_group.users  | default(omit)}}"
-      id       : "{{ unix_group.id     | default(omit)}}"
+      name     : "{{ unix_group_item.name }}"
+      users    : "{{ unix_group_item.users  | default(omit) }}"
+      id       : "{{ unix_group_item.id }}"
       <<: *auth
     delegate_to: localhost
-
-  when: 
-  - unix_group.name | default(false)
+  
 

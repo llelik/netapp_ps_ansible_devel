@@ -1,0 +1,32 @@
+---
+- name: "Role - ontap/name_mapping/create"
+  block:
+  - set_fact:
+      auth: &auth
+        hostname: "{{ auth_rest.hostname | default(omit) }}"
+        username: "{{ auth_rest.username | default(omit) }}"
+        password: "{{ auth_rest.password | default(omit) }}"
+        key_filepath: "{{ auth_rest.key_filepath | default(omit) }}"
+        cert_filepath: "{{ auth_rest.cert_filepath | default(omit) }}"
+        validate_certs: "{{ auth_rest_validate_certs | default(false) }}"
+        use_rest: always
+    no_log: true
+
+  # logging
+  - set_fact:
+      l_cluster:  "{{ cluster   | to_nice_yaml(2) | indent(2,true) | netapp_ps.maf.do_log('ontap/route/create','cluster',qlogdir,qlogname) }}"
+      l_svm:      "{{ svm       | to_nice_yaml(2) | indent(2,true) | netapp_ps.maf.do_log('','svm',qlogdir,qlogname) }}"
+      l_route:    "{{ route     | to_nice_yaml(2) | indent(2,true) | netapp_ps.maf.do_log('','route',qlogdir,qlogname) }}"
+
+  - name: "Create route for SVM [{{ svm.name }}]"
+    netapp.ontap.na_ontap_net_routes:
+      <<: *auth
+      state:       present
+      vserver:     "{{ svm.name }}"
+      destination: "{{ route_item.destination.address }}/{{ route_item.destination.netmask }}"
+      gateway:     "{{ route_item.gateway }}"
+      metric:      "{{ route_item.metric             | default(20) }}"
+
+  when: 
+  - svm.name | default(false)
+  - route_item.gateway | default(false)

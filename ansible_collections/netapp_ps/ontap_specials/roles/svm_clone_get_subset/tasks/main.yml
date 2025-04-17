@@ -48,4 +48,4 @@
     vars_local:
       clone_source: "{{ lookup('template', 'locals.j2') | from_yaml  }}"
 - debug: var=vars_local
-- fail: msg=STOP
+#- fail: msg=STOP

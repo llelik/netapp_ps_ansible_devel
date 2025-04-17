@@ -1,0 +1,6 @@
+{%- if svm_read_data.dns is defined and svm_read_data.dns | length > 0 -%}
+dns:
+    domains:         {{ svm_read_data.dns[0].domains       | default(omit) }}
+    servers:     {{ svm_read_data.dns[0].servers       | default(omit) }}
+    skip_validation: True
+{% endif %}

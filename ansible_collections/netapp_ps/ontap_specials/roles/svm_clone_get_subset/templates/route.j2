@@ -1,0 +1,11 @@
+{%- if svm_read_data.route is defined and svm_read_data.route | length > 0 -%}
+route:
+{% for rt in svm_read_data.route %}
+  - gateway:      {{ rt.gateway             | default(omit) }}
+    metric:       {{ rt.metric              | default(omit) }}
+    destination:
+      address:    {{ rt.destination.address | default(omit) }}
+      netmask:    {{ rt.destination.netmask | default(omit) }}
+      family:     {{ rt.destination.family  | default(omit) }}
+{% endfor %}
+{% endif %}

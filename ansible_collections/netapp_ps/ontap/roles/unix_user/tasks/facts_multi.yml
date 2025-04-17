@@ -1,0 +1,7 @@
+---
+
+## Naming facts
+- name: Merge Extravars
+  ansible.builtin.set_fact:
+    unix_user: "{{ 'unix_user' | netapp_ps.maf.merge_lists(v=vars_local,required_keys=['id'],c=qtask_child) }}"
+

@@ -1,0 +1,10 @@
+- ansible.builtin.include_role: 
+    name: "netapp_ps.ontap.{{ config_item }}"
+  vars:
+    qtask: facts_multi
+    qchild: clone_source
+- ansible.builtin.include_role: 
+    name: "netapp_ps.ontap.{{ config_item }}"
+  vars:
+    qtask: create_multi
+    qchild: clone_source

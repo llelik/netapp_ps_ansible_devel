@@ -1,0 +1,7 @@
+---
+
+## Naming facts
+- name: Merge Extravars
+  ansible.builtin.set_fact:
+    route : "{{ 'route' | netapp_ps.maf.merge_lists(v=vars_local,required_keys=['gateway'],c=qtask_child) }}"
+

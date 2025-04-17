@@ -31,6 +31,20 @@
   register: svm_source_info
 
 - set_fact:
+    singular_subset_items:
+      - dns
+      - nfs
+      - cifs
+      - iscsi
+    multi_subset_items:
+      - route
+      - export_policy
+      - cifs_share
+      - name_mapping
+      - unix_user
+      - unix_group
+
+- set_fact:
     source_svm_uuid:   "{{ svm_source_info.ontap_info[config_api_paths[api_path_subset].path].records[0].uuid }}"
     clean_ontap_facts: "{{ svm_source_info.ontap_info[config_api_paths[api_path_subset].path] | to_json | netapp_ps.ontap_specials.remove_keys(['uuid', '_links'])  }}"
 
@@ -62,36 +76,76 @@
     qtask: create
     qchild: clone_source
 
-- ansible.builtin.include_role: 
-    name: netapp_ps.ontap.export_policy
-  vars:
-    qtask: facts_multi
-    qchild: clone_source
-- ansible.builtin.include_role: 
-    name: netapp_ps.ontap.export_policy
-  vars:
-    qtask: create_multi
-    qchild: clone_source
+- name: Include roles for singular configuration items
+  include_tasks: include_role_one.yml
+  loop: "{{ clone_config }}"
+  loop_control:
+    loop_var: config_item
+    label: "{{ config_item }}"
+  when:
+    - config_item in singular_subset_items
 
-- ansible.builtin.include_role: 
-    name: netapp_ps.ontap.cifs
-  vars:
-    qtask: facts
-    qchild: clone_source
-- ansible.builtin.include_role: 
-    name: netapp_ps.ontap.cifs
-  vars:
-    qtask: create
-    qchild: clone_source
+- name: Include roles for multi configuration items
+  include_tasks: include_role_multi.yml
+  loop: "{{ clone_config }}"
+  loop_control:
+    loop_var: config_item
+    label: "{{ config_item }}"
+  when:
+    - config_item in multi_subset_items
 
-- ansible.builtin.include_role: 
-    name: netapp_ps.ontap.cifs_share
-  vars:
-    qtask: facts_multi
-    qchild: clone_source
-- ansible.builtin.include_role: 
-    name: netapp_ps.ontap.cifs_share
-  vars:
-    qtask: create_multi
-    qchild: clone_source
+# - ansible.builtin.include_role: 
+#     name: netapp_ps.ontap.route
+#   vars:
+#     qtask: facts_multi
+#     qchild: clone_source
+# - ansible.builtin.include_role: 
+#     name: netapp_ps.ontap.route
+#   vars:
+#     qtask: create_multi
+#     qchild: clone_source
+
+# - ansible.builtin.include_role: 
+#     name: netapp_ps.ontap.dns
+#   vars:
+#     qtask: facts
+#     qchild: clone_source
+# - ansible.builtin.include_role: 
+#     name: netapp_ps.ontap.dns
+#   vars:
+#     qtask: create
+#     qchild: clone_source
+
+# - ansible.builtin.include_role: 
+#     name: netapp_ps.ontap.export_policy
+#   vars:
+#     qtask: facts_multi
+#     qchild: clone_source
+# - ansible.builtin.include_role: 
+#     name: netapp_ps.ontap.export_policy
+#   vars:
+#     qtask: create_multi
+#     qchild: clone_source
+
+# - ansible.builtin.include_role: 
+#     name: netapp_ps.ontap.cifs
+#   vars:
+#     qtask: facts
+#     qchild: clone_source
+# - ansible.builtin.include_role: 
+#     name: netapp_ps.ontap.cifs
+#   vars:
+#     qtask: create
+#     qchild: clone_source
+
+# - ansible.builtin.include_role: 
+#     name: netapp_ps.ontap.cifs_share
+#   vars:
+#     qtask: facts_multi
+#     qchild: clone_source
+# - ansible.builtin.include_role: 
+#     name: netapp_ps.ontap.cifs_share
+#   vars:
+#     qtask: create_multi
+#     qchild: clone_source
     

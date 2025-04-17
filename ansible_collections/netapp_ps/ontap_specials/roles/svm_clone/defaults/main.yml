@@ -13,9 +13,9 @@ config_api_paths:
       - nfs.allowed
       - cifs.enabled
       - cifs.allowed
-      - cifs.name
-      - cifs.ad_domain.organizational_unit
-      - cifs.ad_domain.fqdn
+      # - cifs.name
+      # - cifs.ad_domain.organizational_unit
+      # - cifs.ad_domain.fqdn
       - fcp.enabled
       - fcp.allowed
       - ndmp.allowed
@@ -158,4 +158,18 @@ config_api_paths:
         - id
         - primary_gid
         - full_name
+  dns:
+      path: "name-services/dns"
+      fields:
+        - servers
+        - domains
+  route:
+      path: "network/ip/routes"
+      fields:
+        - gateway
+        - destination.address
+        - destination.netmask
+        - destination.family
+        - metric
+
 

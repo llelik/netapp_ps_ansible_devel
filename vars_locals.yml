@@ -1,1 +1,0 @@
-{"clone_source": {"nfs": {"showmount": true, "nfsv3": true, "nfsv4": true, "nfsv41": true, "nfsv41_acl": false, "nfsv41_pnfs": false, "tcp_max_xfer_size": 65536, "vstorage_state": false}, "cifs": {}, "iscsi": {"target_alias": "svm_alexeym300"}}}

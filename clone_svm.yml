@@ -44,13 +44,15 @@
         api_path_subset: svm
         new_svm_name: "{{ dst_cluster.svm }}"
         clone_config:
+          - dns
+          - route
           # - export_policy
           # - nfs
           #- name_mapping
-          - cifs
-          - cifs_shares
-          #- unix_group
-          #- unix_user
+          # - cifs
+          # - cifs_shares
+          - unix_group
+          - unix_user
           # - cifs
           # - iscsi
         
