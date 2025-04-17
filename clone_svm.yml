@@ -46,15 +46,14 @@
         clone_config:
           - dns
           - route
-          # - export_policy
-          # - nfs
-          #- name_mapping
-          # - cifs
-          # - cifs_shares
+          - export_policy
+          - nfs
+          - name_mapping
           - unix_group
           - unix_user
-          # - cifs
-          # - iscsi
+          - iscsi
+          ## - cifs
+          ## - cifs_share
         
     
     - debug: var=vars_local

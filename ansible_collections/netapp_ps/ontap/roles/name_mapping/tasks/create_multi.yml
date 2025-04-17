@@ -10,4 +10,4 @@
   loop_control:
     loop_var: name_mapping_item
     label: "Creating name_mapping {{ name_mapping_item.direction }} -> {{ name_mapping_item.index | default('') }}"
-  loop: "{{ name_mappings }}"
+  loop: "{{ name_mapping }}"

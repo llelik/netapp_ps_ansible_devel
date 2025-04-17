@@ -1,2 +1,4 @@
-  iscsi:
-    target_alias: {{ svm_read_data.iscsi.target.alias          | default(omit) }}
+{%- if svm_read_data.iscsi is defined and svm_read_data.iscsi | length > 0 -%}
+iscsi:
+  target_alias: {{ svm_read_data.iscsi.target.alias          | default(omit) }}
+{% endif %}
