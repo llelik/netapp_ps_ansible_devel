@@ -41,8 +41,8 @@
       vserver:         "{{ volclone.destination_svm }}"
       name:            "{{ volclone_item.destination_volume }}"
       space_guarantee: "{{ clone_options.vol_guarantee        | default('none') }}"
-    when:
-      - clone_options.split_clone | default(True) | bool
+    # when:
+    #   - clone_options.split_clone | default(True) | bool
   
   # Only split clones can be mounted
   - name: Mount cloned volumes
@@ -53,7 +53,7 @@
       name:            "{{ volclone_item.destination_volume }}"
       junction_path:   "{{ volclone_item.junction_path        | default(omit) }}"
     when:
-      - (clone_options.split_clone | default(True) | bool) and volclone_item.junction_path is defined and not (volclone_item.junction_path | default('') == '/')
+      - volclone_item.junction_path is defined and not (volclone_item.junction_path | default('') == '/')
 
   - name: Set Export Policy for cloned volumes
     netapp.ontap.na_ontap_volume:
