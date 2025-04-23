@@ -1,7 +1,7 @@
 #########################
 # Playbook creates:
 #- clone of an svm configuration
-#
+# - clone volumes
 # (c) Alexey Mikhaylov
 # NetApp Professional Services Germany
 # alexey.mikhaylov@netapp.com  
@@ -22,7 +22,7 @@
     vars_templates:
     vars_overrides:
     vars_local:
-    qlogname: "create_svm.test"                    # log file name prefix
+    qlogname: "delete_svm.cleanup"                    # log file name prefix
     qlogdir:  "{{ vars['playbook_dir'] }}/logs"    # log file directory
   vars_files:
     - "{{ vars_absolute_path }}/vars.yml"

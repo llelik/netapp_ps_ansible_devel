@@ -1,0 +1,30 @@
+---
+- hosts: localhost
+  gather_facts: no
+  connection: local
+  collections: 
+    - netapp_ps.ontap_specials
+    - netapp_ps.ontap
+    - netapp_ps.maf
+  vars: 
+    vars_absolute_path: /home/cbcadmin/vars/
+    vars_templates:
+    vars_overrides:
+    vars_local:
+    qlogname: "create_svm.test"                    # log file name prefix
+    qlogdir:  "{{ vars['playbook_dir'] }}/logs"    # log file directory
+  vars_files:
+    - "{{ vars_absolute_path }}/vars.yml"
+  tasks:
+    - name: Set naming facts - Credentials
+      ansible.builtin.set_fact:
+        ontap_username: "{{ src_cluster.username }}"
+        ontap_password: "{{ src_cluster.password }}"
+        cluster:
+          management_ip: "{{ src_cluster.hostname }}"
+      no_log: false
+    
+    - include_tasks: delete_svm_item.yml
+      loop: "{{ target_cluster.svms }}"
+      loop_control:
+        loop_var: svm_del_item

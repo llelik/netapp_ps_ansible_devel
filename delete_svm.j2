@@ -1,0 +1,6 @@
+svm_delete:
+  cluster:
+    name:                {{ target_cluster.cluster }}
+    management_ip:       {{ target_cluster.hostname }}
+  svm:
+    name:                {{ svm_del_item }}

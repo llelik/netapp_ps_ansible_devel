@@ -1,0 +1,15 @@
+- name: Render SVM facts
+  set_fact:
+    vars_defaults:      "{{ lookup('template', './delete_svm.j2')      | from_yaml }}"
+
+- ansible.builtin.include_role:
+    name: netapp_ps.ontap.svm
+  vars:
+    qtask: facts
+    qchild: svm_delete
+- debug: var=vars_defaults
+- ansible.builtin.include_role: 
+    name: netapp_ps.ontap.svm
+  vars:
+    qtask: delete
+    qchild: svm_delete
