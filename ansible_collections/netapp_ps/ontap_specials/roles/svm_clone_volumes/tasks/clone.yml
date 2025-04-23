@@ -20,6 +20,7 @@
       l_cluster:     "{{ cluster   | to_nice_yaml(2) | indent(2,true) | netapp_ps.maf.do_log('ontap/volclone/create','cluster',qlogdir,qlogname) }}"
       l_volclone:    "{{ volclone  | to_nice_yaml(2) | indent(2,true) | netapp_ps.maf.do_log('','volclone',qlogdir,qlogname) }}"
 
+
   - name: "Clone volume [{{ volclone.source_volume }} -> {{ volclone.destination_volume }}]"
     netapp.ontap.na_ontap_volume_clone:
       <<:              *auth
@@ -28,12 +29,12 @@
       name:            "{{ volclone_item.destination_volume }}"
       parent_vserver:  "{{ volclone_item.source_svm }}"
       parent_volume:   "{{ volclone_item.source_volume }}"
-      parent_snapshot: "{{ volclone_item.source_snapshot      | default(omit) }}"
-      volume_type:     "{{ clone_options.clone_vol_type       | lower      | default('rw') }}"
+      parent_snapshot: "{{ clone_options.source_snapshot      | default(omit) }}"
+      volume_type:     "{{ clone_options.clone_vol_type       | default('rw') }}"
       split:           "{{ clone_options.split_clone          | default(True) }}"        
   
 
-  - name: Configure cloned volumes
+  - name: Set space guarantee on cloned volumes
     netapp.ontap.na_ontap_volume:
       <<:              *auth
       state:           present
@@ -41,7 +42,7 @@
       name:            "{{ volclone_item.destination_volume }}"
       space_guarantee: "{{ clone_options.vol_guarantee        | default('none') }}"
     when:
-      - clone_options.split_clone | bool
+      - clone_options.split_clone | default(True) | bool
   
   # Only split clones can be mounted
   - name: Mount cloned volumes
@@ -52,9 +53,7 @@
       name:            "{{ volclone_item.destination_volume }}"
       junction_path:   "{{ volclone_item.junction_path        | default(omit) }}"
     when:
-      - not clone_options.split_clone | bool
-      - volclone_item.junction_path is defined
-      - not (volclone_item.junction_path | default('') == '/')
+      - (clone_options.split_clone | default(True) | bool) and volclone_item.junction_path is defined and not (volclone_item.junction_path | default('') == '/')
 
   - name: Set Export Policy for cloned volumes
     netapp.ontap.na_ontap_volume:
@@ -64,6 +63,5 @@
       name:            "{{ volclone_item.destination_volume }}"
       export_policy:   "{{ volclone_item.export_policy       | default(omit) }}"
     when:
-      - volclone_item.export_policy is defined
-      - clone_options.set_export_policy | default(false)     | bool
+      - volclone_item.export_policy is defined and clone_options.set_export_policy | default(false) | bool
 ...

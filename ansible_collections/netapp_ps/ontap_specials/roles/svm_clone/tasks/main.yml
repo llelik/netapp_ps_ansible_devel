@@ -100,8 +100,5 @@
       vars:
         qtask: clone_multi
         qchild: clone_source
-        clone_options:
-          split_clone: yes
-          set_export_policy: yes
-          clone_vol_type: rw
-          vol_guarantee: 'none'
+        clone_options: "{{ vol_clone_options | default({}) }}"
+...

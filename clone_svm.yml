@@ -43,21 +43,22 @@
         dest_cluster:     "{{ dst_cluster }}"
         api_path_subset:  svm
         new_svm_name:     "{{ dst_cluster.svm }}"
-        clone_volumes:    true
-        clone_options:
-          split_clone: no
-          set_export_policy: yes
-          clone_vol_type: rw
-          vol_guarantee: 'none'
+        clone_volumes:    false
+        # vol_clone_options:
+        #   split_clone: yes
+        #   set_export_policy: yes
+        #   clone_vol_type: rw
+        #   vol_guarantee: 'none'
+          #source_snapshot: 'hourly.2025-04-23_1805' # optional
         clone_config:
-          - dns
-          - route
+          # - dns
+          # - route
           - export_policy
-          - nfs
-          - name_mapping
-          - unix_group
-          - unix_user
-          - iscsi
+          # - nfs
+          # - name_mapping
+          # - unix_group
+          # - unix_user
+          # - iscsi
           #- cifs
           #- cifs_share
         

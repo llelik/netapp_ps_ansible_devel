@@ -1,0 +1,35 @@
+
+
+ontap/nfs/create
+----------------
+cluster:
+  management_ip: trinidad.muccbc.hq.netapp.com
+  name: trinidad
+
+svm:
+  ipspace: Default
+  language: c.utf_8
+  name: svm_alexeym108_clone
+  services:
+    cifs:
+      allowed: true
+    fcp:
+      allowed: true
+      enabled: false
+    iscsi:
+      allowed: true
+      enabled: false
+    nfs:
+      allowed: true
+      enabled: true
+    nvme:
+      allowed: false
+      enabled: false
+    s3: {}
+  snapshot_policy: default
+  source_uuid: f885574f-145a-11f0-a6ac-d039ea087acd
+  subtype: default
+
+nfs:
+  {}
+
