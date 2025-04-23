@@ -1,0 +1,32 @@
+{%- if svm_read_data.cifs_share is defined and svm_read_data.cifs_share | length > 0 -%}
+cifs_share:
+{% for share in svm_read_data.cifs_share +%}
+{% if share.path != '/' %}
+  - name:                     {{ share.name }}
+    path:                     {{ share.path                     | default(omit) }}
+    comment:                  {{ share.comment                  | default(omit) }}   
+    access_based_enumeration: {{ share.access_based_enumeration | default(omit) }}
+    show_snapshot:            {{ share.show_snapshot            | default(omit) }}
+    show_previous_versions:   {{ share.show_previous_versions   | default(omit) }}
+    oplocks:                  {{ share.oplocks                  | default(omit) }}
+    home_directory:           {{ share.home_directory           | default(omit) }}
+    change_notify:            {{ share.change_notify            | default(omit) }}
+    encryption:               {{ share.encryption               | default(omit) }}
+    namespace_caching:        {{ share.namespace_caching        | default(omit) }}
+    continuously_available:   {{ share.continuously_available   | default(omit) }}
+    cifs_browsable:           {{ share.browsable                | default(omit) }}
+    allow_unencrypted_access: {{ share.allow_unencrypted_access | default(omit) }}
+    unix_symlink:             {{ share.unix_symlink             | default(omit) }}
+    offline_files:            {{ share.offline_files            | default(omit) }}
+    vscan_fileop_profile:     {{ share.vscan_profile            | default(omit) }}
+    {%+ if share.acls is defined and share.acls | length > 0 +%}
+    acls: {% for acl_item in share.acls +%}
+        - acl_type:           {{ acl_item.type                       | default(omit) }}
+          user_or_group:      {{ acl_item.user_or_group              | default(omit) }}
+          permission:         {{ acl_item.permission                 | default(omit) }}
+          {% endfor %}
+    {% endif %}
+  {% endif %}
+{% endfor %}
+{% endif %}
+    

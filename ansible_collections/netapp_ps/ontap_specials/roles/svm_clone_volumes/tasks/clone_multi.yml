@@ -1,0 +1,13 @@
+---
+# unfortunately, ansible doesn't allow looping roles
+# so we have a local tasks "clone_one" which includes facts & create of the clone role
+# hence we can create multiple clones in a loop
+
+# - debug: var=qtask_child
+
+- name: Create multiple clones
+  include_tasks: clone_one.yml 
+  loop_control:
+    loop_var: volclone_item
+    label: "Creating vol clone {{ volclone_item.source_volume }} -> {{ volclone_item.destination_volume }}"
+  loop: "{{ volclone }}"

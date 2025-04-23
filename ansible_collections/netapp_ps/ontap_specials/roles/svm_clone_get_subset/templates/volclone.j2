@@ -1,0 +1,11 @@
+volclone:
+{% for vol in svm_read_data.volclone %}
+{% if vol.nas.path | default('') != '/' %}
+  - source_svm:           {{ s_cluster.svm }}
+    destination_svm:      {{ d_cluster.svm }}
+    source_volume:        {{ vol.name }}
+    destination_volume:   {{ vol.name }}
+    export_policy:        {{ vol.nas.export_policy.name | default(omit) }}
+    junction_path:        {{ vol.nas.path               | default(omit) }}
+{% endif %}
+{% endfor %}

@@ -1,0 +1,16 @@
+
+
+ontap/volclone/create
+---------------------
+cluster:
+  management_ip: trinidad.muccbc.hq.netapp.com
+  name: trinidad
+
+route:
+  destination_svm: svm_alexeym101_clone
+  destination_volume: vol_data_nfs
+  export_policy: default
+  junction_path: /vol_data_nfs
+  source_svm: svm_alexeym100
+  source_volume: vol_data_nfs
+

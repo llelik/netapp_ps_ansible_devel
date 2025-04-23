@@ -24,10 +24,10 @@
       state                   : present
       vserver                 : "{{ svm.name }}"
       name                    : "{{ cifs.name }}"
-      admin_user_name         : "{{ ad_username | default(omit)}}"     # need to be processed in the credentials step !
-      admin_password          : "{{ ad_password | default(omit)}}"     # TODO
-      domain                  : "{{ cifs.domain | default(omit)}}"     # TODO
-      ou                      : "{{ cifs.ou | default(omit)}}"         # TODO
+      admin_user_name         : "{{ ad_username                   | default(omit) }}"     # need to be processed in the credentials step !
+      admin_password          : "{{ ad_password                   | default(omit) }}"     # TODO
+      domain                  : "{{ cifs.domain                   | default(omit) }}"     # TODO
+      ou                      : "{{ cifs.ou                       | default(omit) }}"     # TODO
       session_security        : "{{ cifs.session_security         | default(omit) }}"
       smb_encryption          : "{{ cifs.smb_encryption           | default(omit) }}"
       smb_signing             : "{{ cifs.smb_signing              | default(omit) }}"

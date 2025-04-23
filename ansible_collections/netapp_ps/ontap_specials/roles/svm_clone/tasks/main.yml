@@ -23,26 +23,11 @@
 - name: Read SVM source info
   netapp.ontap.na_ontap_rest_info:
     <<: *src_auth
-    #use_python_keys:    true
     gather_subset:      "{{ config_api_paths[api_path_subset].path }}"
     fields:             "{{ config_api_paths[api_path_subset].fields }}"
     parameters:
       name:             "{{ source_cluster.svm }}"
   register: svm_source_info
-
-- set_fact:
-    singular_subset_items:
-      - dns
-      - nfs
-      - cifs
-      - iscsi
-    multi_subset_items:
-      - route
-      - export_policy
-      - cifs_share
-      - name_mapping
-      - unix_user
-      - unix_group
 
 - set_fact:
     source_svm_uuid:   "{{ svm_source_info.ontap_info[config_api_paths[api_path_subset].path].records[0].uuid }}"
@@ -51,19 +36,10 @@
 - set_fact:
     svm_read_facts: "{{ clean_ontap_facts.records[0] }}"
 
-- name: Read requested SVM configration info
-  include_role: 
-    name: netapp_ps.ontap_specials.svm_clone_get_subset
-  vars:
-    s_cluster:        "{{ source_cluster }}"
-    d_cluster:        "{{ dest_cluster }}"
-    api_path_request: "{{ clone_config }}"
-    source_svm_uuid: "{{ source_svm_uuid }}"
-
 - name: Render SVM facts
   set_fact:
-    vars_defaults: "{{ lookup('template', 'svm.j2') | from_yaml }}"
-    source_svm_name: "{{ svm_read_facts.name }}"
+    vars_defaults:      "{{ lookup('template', 'svm.j2')      | from_yaml }}"
+    source_svm_name:    "{{ svm_read_facts.name }}"
 
 - ansible.builtin.include_role:
     name: netapp_ps.ontap.svm
@@ -75,6 +51,15 @@
   vars:
     qtask: create
     qchild: clone_source
+
+- name: Read requested SVM configration info
+  include_role: 
+    name: netapp_ps.ontap_specials.svm_clone_get_subset
+  vars:
+    s_cluster:        "{{ source_cluster }}"
+    d_cluster:        "{{ dest_cluster }}"
+    api_path_request: "{{ clone_config }}"
+    source_svm_uuid: "{{ source_svm_uuid }}"
 
 - name: Include roles for singular configuration items
   include_tasks: include_role_one.yml
@@ -94,58 +79,29 @@
   when:
     - config_item in multi_subset_items
 
-# - ansible.builtin.include_role: 
-#     name: netapp_ps.ontap.route
-#   vars:
-#     qtask: facts_multi
-#     qchild: clone_source
-# - ansible.builtin.include_role: 
-#     name: netapp_ps.ontap.route
-#   vars:
-#     qtask: create_multi
-#     qchild: clone_source
-
-# - ansible.builtin.include_role: 
-#     name: netapp_ps.ontap.dns
-#   vars:
-#     qtask: facts
-#     qchild: clone_source
-# - ansible.builtin.include_role: 
-#     name: netapp_ps.ontap.dns
-#   vars:
-#     qtask: create
-#     qchild: clone_source
-
-# - ansible.builtin.include_role: 
-#     name: netapp_ps.ontap.export_policy
-#   vars:
-#     qtask: facts_multi
-#     qchild: clone_source
-# - ansible.builtin.include_role: 
-#     name: netapp_ps.ontap.export_policy
-#   vars:
-#     qtask: create_multi
-#     qchild: clone_source
-
-# - ansible.builtin.include_role: 
-#     name: netapp_ps.ontap.cifs
-#   vars:
-#     qtask: facts
-#     qchild: clone_source
-# - ansible.builtin.include_role: 
-#     name: netapp_ps.ontap.cifs
-#   vars:
-#     qtask: create
-#     qchild: clone_source
-
-# - ansible.builtin.include_role: 
-#     name: netapp_ps.ontap.cifs_share
-#   vars:
-#     qtask: facts_multi
-#     qchild: clone_source
-# - ansible.builtin.include_role: 
-#     name: netapp_ps.ontap.cifs_share
-#   vars:
-#     qtask: create_multi
-#     qchild: clone_source
+- name: Clone volumes
+  when: clone_volumes | default(false) | bool
+  block:
+    - ansible.builtin.include_role: 
+        name: netapp_ps.ontap_specials.svm_clone_get_subset
+      vars:
+        s_cluster:          "{{ source_cluster }}"
+        d_cluster:          "{{ dest_cluster }}"
+        api_path_request:
+          - volclone
     
+    - ansible.builtin.include_role: 
+        name: netapp_ps.ontap_specials.svm_clone_volumes
+      vars:
+        qtask: facts_multi
+        qchild: clone_source
+    - ansible.builtin.include_role: 
+        name: netapp_ps.ontap_specials.svm_clone_volumes
+      vars:
+        qtask: clone_multi
+        qchild: clone_source
+        clone_options:
+          split_clone: yes
+          set_export_policy: yes
+          clone_vol_type: rw
+          vol_guarantee: 'none'

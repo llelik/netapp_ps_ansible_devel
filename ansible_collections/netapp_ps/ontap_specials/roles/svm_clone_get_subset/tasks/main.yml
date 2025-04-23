@@ -15,19 +15,21 @@
 
 - name: Read SVM source info items
   netapp.ontap.na_ontap_rest_info:
-    <<: *src_auth
-    #use_python_keys:    true
+    <<:                 *src_auth
     gather_subset:      "{{ config_api_paths[api].path }}"
     fields:             "{{ config_api_paths[api].fields }}"
     parameters:
-      svm.name:             "{{ source_cluster.svm }}"
-  loop: "{{ clone_config }}"
+      svm.name:         "{{ source_cluster.svm }}"
+  loop: "{{ api_path_request }}"
   loop_control:
     loop_var: api
   register: svm_config_info
 
 - debug: var=svm_config_info
 
+# for ease of debugging, we will remove the uuid and _links from the results
+# this is not needed for the rest of the playbook
+# this is done to make the output more readable
 - name: Render clean ONTAP facts
   set_fact:
     clean_ontap_facts: "{{ svm_config_info | to_json | netapp_ps.ontap_specials.remove_keys(['uuid', '_links'])  }}"
@@ -39,9 +41,11 @@
                         { cfg_item: (clean_ontap_facts.results | selectattr('api', 'equalto', cfg_item))[0].ontap_info[config_api_paths[cfg_item].path].records | default([])}
                     )
                     }}"
-  loop: "{{ clone_config }}"
+  loop: "{{ api_path_request }}"
   loop_control:
     loop_var: cfg_item
+
+- debug: var=svm_read_data
 
 - name: Render local vars from APIs response on source
   set_fact:

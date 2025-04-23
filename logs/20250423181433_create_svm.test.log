@@ -1,0 +1,67 @@
+
+
+ontap/nfs/create
+----------------
+cluster:
+  management_ip: trinidad.muccbc.hq.netapp.com
+  name: trinidad
+
+svm:
+  ipspace: Default
+  language: c.utf_8
+  name: svm_alexeym106_clone
+  services:
+    cifs:
+      allowed: true
+    fcp:
+      allowed: true
+      enabled: false
+    iscsi:
+      allowed: true
+      enabled: false
+    nfs:
+      allowed: true
+      enabled: true
+    nvme:
+      allowed: false
+      enabled: false
+    s3: {}
+  snapshot_policy: default
+  source_uuid: f885574f-145a-11f0-a6ac-d039ea087acd
+  subtype: default
+
+nfs:
+  exports:
+    name_service_lookup_protocol: udp
+    netgroup_trust_any_nsswitch_no_match: false
+  nfsv3: disabled
+  nfsv4: enabled
+  nfsv40_acl: enabled
+  nfsv40_read_delegation: disabled
+  nfsv40_referrals: disabled
+  nfsv40_write_delegation: disabled
+  nfsv41: enabled
+  nfsv41_acl: enabled
+  nfsv41_pnfs: enabled
+  nfsv4_fsid_change: enabled
+  nfsv4_id_domain: netapp.com
+  root:
+    ignore_nt_acl: false
+    skip_write_permission_check: false
+  security:
+    chown_mode: use_export_policy
+    nt_acl_display_permission: false
+    ntfs_unix_security: use_export_policy
+    permitted_encryption_types:
+    - aes_128
+    - aes_256
+    rpcsec_context_idle: 0
+  showmount: enabled
+  tcp: enabled
+  tcp_max_xfer_size: 65536
+  udp: enabled
+  vstorage_state: disabled
+  windows:
+    map_unknown_uid_to_default_user: true
+    v3_ms_dos_client_enabled: false
+

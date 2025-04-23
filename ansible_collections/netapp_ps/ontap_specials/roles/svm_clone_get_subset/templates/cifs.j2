@@ -2,21 +2,23 @@
   {%- if svm_read_data.cifs is defined and svm_read_data.cifs | length > 0 -%}
   cifs:
     name:                     'SVMALEXEYMTEST'
-    domain:                   {{ svm_read_data.cifs.ad_domain.fqdn                    | default(omit) }}
-    ou:                       {{ svm_read_data.cifs.ad_domain.organizational_unit     | default(omit) }}
-    session_security:         {{ svm_read_data.cifs.security.session_security         | default(omit) }}
-    smb_encryption:           {{ svm_read_data.cifs.security.smb_encryption           | default(omit) }}
-    smb_signing:              {{ svm_read_data.cifs.security.smb_signing              | default(omit) }}
-    try_ldap_channel_binding: {{ svm_read_data.cifs.security.try_ldap_channel_binding | default(omit) }}
-    restrict_anonymous:       {{ svm_read_data.cifs.security.restrict_anonymous       | default(omit) }}
-    lm_compatibility_level:   {{ svm_read_data.cifs.security.lm_compatibility_level   | default(omit) }}
-    ldap_referral_enabled:    {{ svm_read_data.cifs.security.ldap_referral_enabled    | default(omit) }}
-    kdc_encryption:           {{ svm_read_data.cifs.security.kdc_encryption           | default(omit) }}
-    encrypt_dc_connection:    {{ svm_read_data.cifs.security.encrypt_dc_connection    | default(omit) }}
-    use_ldaps:                {{ svm_read_data.cifs.security.use_ldaps                | default(omit) }}
-    aes_netlogon_enabled:     {{ svm_read_data.cifs.security.aes_netlogon_enabled     | default(omit) }}
-    use_start_tls:            {{ svm_read_data.cifs.security.use_start_tls            | default(omit) }}
-    default_site:             {{ svm_read_data.cifs.default_site                      | default(omit) }}
-    aes_netlogon_enabled:     {{ svm_read_data.cifs.aes_netlogon_enabled              | default(omit) }}
+    domain:                   {{ svm_read_data.cifs[0].ad_domain.fqdn                    | default(omit) }}
+    ou:                       {{ svm_read_data.cifs[0].ad_domain.organizational_unit     | default(omit) }}
+    session_security:         {{ svm_read_data.cifs[0].security.session_security         | default(omit) }}
+    smb_encryption:           {{ svm_read_data.cifs[0].security.smb_encryption           | default(omit) }}
+    smb_signing:              {{ svm_read_data.cifs[0].security.smb_signing              | default(omit) }}
+    try_ldap_channel_binding: {{ svm_read_data.cifs[0].security.try_ldap_channel_binding | default(omit) }}
+    restrict_anonymous:       {{ svm_read_data.cifs[0].security.restrict_anonymous       | default(omit) }}
+    lm_compatibility_level:   {{ svm_read_data.cifs[0].security.lm_compatibility_level   | default(omit) }}
+    ldap_referral_enabled:    {{ svm_read_data.cifs[0].security.ldap_referral_enabled    | default(omit) }}
+    kdc_encryption:           {{ svm_read_data.cifs[0].security.kdc_encryption           | default(omit) }}
+    encrypt_dc_connection:    {{ svm_read_data.cifs[0].security.encrypt_dc_connection    | default(omit) }}
+    use_ldaps:                {{ svm_read_data.cifs[0].security.use_ldaps                | default(omit) }}
+    aes_netlogon_enabled:     {{ svm_read_data.cifs[0].security.aes_netlogon_enabled     | default(omit) }}
+    use_start_tls:            {{ svm_read_data.cifs[0].security.use_start_tls            | default(omit) }}
+    default_site:             {{ svm_read_data.cifs[0].default_site                      | default(omit) }}
+    aes_netlogon_enabled:     {{ svm_read_data.cifs[0].aes_netlogon_enabled              | default(omit) }}
+    admin_user_name:          {{ ad_username                  | default(omit) }}
+    admin_password:           {{ ad_password              | default(omit) }}
 
 {% endif %}

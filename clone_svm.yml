@@ -41,8 +41,14 @@
       vars:
         source_cluster:   "{{ src_cluster }}"
         dest_cluster:     "{{ dst_cluster }}"
-        api_path_subset: svm
-        new_svm_name: "{{ dst_cluster.svm }}"
+        api_path_subset:  svm
+        new_svm_name:     "{{ dst_cluster.svm }}"
+        clone_volumes:    true
+        clone_options:
+          split_clone: no
+          set_export_policy: yes
+          clone_vol_type: rw
+          vol_guarantee: 'none'
         clone_config:
           - dns
           - route
@@ -52,8 +58,8 @@
           - unix_group
           - unix_user
           - iscsi
-          ## - cifs
-          ## - cifs_share
+          #- cifs
+          #- cifs_share
         
     
     - debug: var=vars_local

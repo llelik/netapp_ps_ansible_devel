@@ -1,0 +1,69 @@
+---
+- name: "Role - ontap/name_mapping/create"
+  when: 
+    - volclone_item.source_svm    | default(false)
+    - volclone_item.source_volume | default(false)
+  block:
+  - set_fact:
+      auth: &auth
+        hostname:       "{{ auth_rest.hostname | default(omit) }}"
+        username:       "{{ auth_rest.username | default(omit) }}"
+        password:       "{{ auth_rest.password | default(omit) }}"
+        key_filepath:   "{{ auth_rest.key_filepath | default(omit) }}"
+        cert_filepath:  "{{ auth_rest.cert_filepath | default(omit) }}"
+        validate_certs: "{{ auth_rest_validate_certs | default(false) }}"
+        use_rest:       always
+    no_log: true
+
+  # logging
+  - set_fact:
+      l_cluster:     "{{ cluster   | to_nice_yaml(2) | indent(2,true) | netapp_ps.maf.do_log('ontap/volclone/create','cluster',qlogdir,qlogname) }}"
+      l_volclone:    "{{ volclone  | to_nice_yaml(2) | indent(2,true) | netapp_ps.maf.do_log('','volclone',qlogdir,qlogname) }}"
+
+  - name: "Clone volume [{{ volclone.source_volume }} -> {{ volclone.destination_volume }}]"
+    netapp.ontap.na_ontap_volume_clone:
+      <<:              *auth
+      state:           present
+      vserver:         "{{ volclone.destination_svm }}"
+      name:            "{{ volclone_item.destination_volume }}"
+      parent_vserver:  "{{ volclone_item.source_svm }}"
+      parent_volume:   "{{ volclone_item.source_volume }}"
+      parent_snapshot: "{{ volclone_item.source_snapshot      | default(omit) }}"
+      volume_type:     "{{ clone_options.clone_vol_type       | lower      | default('rw') }}"
+      split:           "{{ clone_options.split_clone          | default(True) }}"        
+  
+
+  - name: Configure cloned volumes
+    netapp.ontap.na_ontap_volume:
+      <<:              *auth
+      state:           present
+      vserver:         "{{ volclone.destination_svm }}"
+      name:            "{{ volclone_item.destination_volume }}"
+      space_guarantee: "{{ clone_options.vol_guarantee        | default('none') }}"
+    when:
+      - clone_options.split_clone | bool
+  
+  # Only split clones can be mounted
+  - name: Mount cloned volumes
+    netapp.ontap.na_ontap_volume:
+      <<:              *auth
+      state:           present
+      vserver:         "{{ volclone.destination_svm }}"
+      name:            "{{ volclone_item.destination_volume }}"
+      junction_path:   "{{ volclone_item.junction_path        | default(omit) }}"
+    when:
+      - not clone_options.split_clone | bool
+      - volclone_item.junction_path is defined
+      - not (volclone_item.junction_path | default('') == '/')
+
+  - name: Set Export Policy for cloned volumes
+    netapp.ontap.na_ontap_volume:
+      <<:              *auth
+      state:           present
+      vserver:         "{{ volclone.destination_svm }}"
+      name:            "{{ volclone_item.destination_volume }}"
+      export_policy:   "{{ volclone_item.export_policy       | default(omit) }}"
+    when:
+      - volclone_item.export_policy is defined
+      - clone_options.set_export_policy | default(false)     | bool
+...

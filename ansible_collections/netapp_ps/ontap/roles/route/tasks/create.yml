@@ -1,5 +1,5 @@
 ---
-- name: "Role - ontap/name_mapping/create"
+- name: "Role - ontap/route/create"
   block:
   - set_fact:
       auth: &auth
