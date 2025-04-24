@@ -31,4 +31,4 @@ jobs:
           ansible-galaxy install -r gha-test/requirements.yml
 
       - name: Run Ansible Playbook
-        run: ansible-playbook --extra-vars "vault_token_ro=\${{ env.vault_token_ro }} input_cmdb_dest=\${{ github.event.inputs.input_cmdb_dest }}" gha-test/gha-test.yml
+        run: ansible-playbook -vvv --extra-vars "vault_token_ro=\${{ env.vault_token_ro }} input_cmdb_dest=\${{ github.event.inputs.input_cmdb_dest }}" gha-test/gha-test.yml
