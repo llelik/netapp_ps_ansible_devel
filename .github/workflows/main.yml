@@ -1,0 +1,34 @@
+name: My Workflow
+on:
+  push:
+    branches:
+      - main
+  workflow_dispatch:
+    inputs:
+      input_cmdb_dest:
+        description: 'Destination CMDB'
+        required: true
+
+env:
+  vault_token_ro: \${{ secrets.VAULT_TOKEN_RO }}
+
+
+
+jobs:
+  ansible:
+    runs-on: self-hosted
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Set up Python and dependencies
+        run: |
+          # Install required Python libraries
+          pip3.12 install pynetbox
+
+          # Install Ansible and required collections
+          #pip install ansible
+          ansible-galaxy collection install -f netbox.netbox
+
+      - name: Run Ansible Playbook
+        run: ansible-playbook --extra-vars "vault_token_ro=\${{ env.vault_token_ro }} input_cmdb_dest=\${{ github.event.inputs.input_cmdb_dest }}" gha-test.yml

@@ -1,0 +1,161 @@
+---
+- hosts: localhost
+  gather_facts: no
+  collections:
+    - muccbc.security
+  vars_files:
+    - "/mnt/app_data/ansibleforms-docker/data/playbooks/vars/connection.yml"
+    - "/mnt/app_data/ansibleforms-docker/data/playbooks/vars/vm_templates_map.yml"
+    - "/mnt/app_data/ansibleforms-docker/data/playbooks/vars/vm_net_defaults.yml"
+    - "/mnt/app_data/ansibleforms-docker/data/playbooks/vars/vm_clusters.yml"
+   
+  vars:
+    vars_path:           /app/dist/persistent/playbooks/vars
+  tasks:
+    # - name: Read token
+    #   set_fact:
+    #     vault_token_ro: "{{ (lookup('file', vars_path+'/cbc-api-tokens.json') | from_json)['vault_token'] }}"
+    #     #vault_token_ro: "{{ (lookup('file', '/mnt/app_data/ansibleforms-docker/data/playbooks/vars/cbc-api-tokens.json') | from_json)['vault_token'] }}"
+    #   no_log: true
+    - assert:
+        that: 
+          - input_cmdb_dest is defined
+        msg: "Please provide input_cmdb_dest variable"
+    - assert:
+        that: 
+          - vault_token_ro is defined
+        msg: "Please provide vault token variable"
+
+    - name: Read Vault secrets
+      include_role: 
+        name: muccbc.security.get_vault_creds
+      vars:
+        secret_path: "{{ item }}"
+        vault_token: "{{ vault_token_ro }}"
+        vault_type: hashicorp
+      no_log: true
+      loop: # secret paths
+        - proxmox
+        - netbox
+
+    - name: Set CMDB destination DEV
+      ansible.builtin.set_fact:
+        netbox_url_dest: "{{ netbox_url_dev }}"
+      when:
+        - input_cmdb_dest | lower == "dev"
+    
+    - name: Set CMDB destination PROD
+      ansible.builtin.set_fact:
+        netbox_url_dest: "{{ netbox_url }}"
+      when:
+        - input_cmdb_dest | lower == "prod"
+      
+    - name: Set Netbox connection details
+      ansible.builtin.set_fact:
+        auth_nb: &auth_nb
+          netbox_token: "{{ netbox_token_secret }}"
+          netbox_url:   "{{ netbox_url_dest }}"
+          validate_certs:   false
+      no_log: true
+
+    # - name: Read tenants data from file
+    #   set_fact:
+    #     tenants: "{{ lookup('file', 'octets_tenants.json') | from_json }}"
+    #     tenant_full_names: "{{ lookup('file', 'tenant_full_names.json') | from_json }}"
+
+    - name: "KVM: get vm config"
+      ansible.builtin.uri:
+        url:              "https://{{ proxmox_api_host }}/api2/json/cluster/resources/?type=vm"
+        #http://$(PROXMOX_HOST):8006/api2/json/cluster/resources/?type=vm
+        method:           GET
+        headers:
+          Authorization: "PVEAPIToken={{ proxmox_api_token_user }}!{{ proxmox_api_token_id }}={{ proxmox_api_token_secret }}"
+        validate_certs:   no
+        body_format:      form-urlencoded
+        status_code:      200
+        return_content:   yes
+      register: vm_config
+
+    - set_fact:
+        vm_nodes: "{{ vm_config['json'] | json_query(vm_q) }}"
+      vars:
+        vm_q: "data[].{vmid:vmid, node:node, name:name}"
+
+    - set_fact:
+       node_list: "{{ vm_config['json']['data'] | map(attribute='node') | list | unique }}"
+    
+    - name: "KVM: get vm interfaces via QEMU agent"
+      ansible.builtin.uri:
+        url:              "https://{{ proxmox_api_host }}/api2/json/nodes/{{ item.node }}/qemu/{{ item.vmid }}/agent/network-get-interfaces"
+        #https://cbc-kvm-11.muccbc.hq.netapp.com:8006/api2/json/nodes/cbc-kvm-11/qemu/121/agent/network-get-interfaces
+        method:           GET
+        headers:
+          Authorization: "PVEAPIToken={{ proxmox_api_token_user }}!{{ proxmox_api_token_id }}={{ proxmox_api_token_secret }}"
+        validate_certs:   no
+        body_format:      form-urlencoded
+        status_code:      200
+        return_content:   yes
+      #loop: "{{ vm_nodes }}"
+      loop:
+         - {node: 'cbc-kvm-11', vmid: 23314, name: 'alexeym-lnx14'}
+         - {node: 'cbc-kvm-11', vmid: 400, name: 'alexeym-cbc-a00-admin'}
+         - {node: 'cbc-kvm-21', vmid: 103, name: 'cbc-bluexp-ds'}
+         - {node: 'cbc-kvm-12', vmid: 1727160, name: 'cbc-cloudsecag'}
+      #    - {node: 'cbc-kvm-12', vmid: 56223, name: 'klaus-rac3'}
+      #    - {node: 'cbc-kvm-13', vmid: 1061, name: 'hdumdey-jump'}
+      register: vm_interfaces
+      ignore_errors: yes
+      no_log: true
+
+    #- debug: var=vm_interfaces
+    #- debug: var=vm_interfaces.results[0].json.data.result[1]['ip-addresses']
+    - set_fact: 
+        ip_s: "{{ ip_s|default([]) + [{'vmname': item.item.name, 'vmid': item.item.vmid, 'ip_data': item.json.data.result|selectattr('ip-addresses','defined')}] }}" #|map(attribute='ip-addresses') }}"
+      loop: "{{ vm_interfaces.results }}"
+      when: item.json.data.result is defined
+      no_log: true
+    
+    - name: get final ip data
+      set_fact:
+        ipdata: "{{ ip_s | parse_proxmox_vm_ip }}"
+
+    - debug: var=ipdata
+
+    - set_fact:
+        clean_ipdata: "{{ ipdata| rejectattr('pri_ip', 'equalto', []) | to_nice_json }}"
+    - copy:
+        content: "{{ clean_ipdata }}"
+        dest: "./ipdata_proxmox.json"
+
+    - fail: msg=STOP
+
+    - name: "NETBOX: Register VM"
+      netbox.netbox.netbox_virtual_machine:
+        <<:                *auth_nb
+        state:             present
+        data:
+          name:         "{{ item.vmname }}"
+          cluster:      "{{ kvm_default_cluster }}"
+          site:         "{{ default_site }}"
+          virtual_machine_role: VM
+          custom_fields:
+            vmid:       "{{ item.vmid }}"
+          tenant:       "{{ tenants[item.octet_id] }}"
+      when: 
+        - item.octet_id in tenants.keys()
+      loop: "{{ ipdata }}"
+
+    - name: "Create VM interfaces: "
+      include_tasks: import_vm_interface_netbox.yml
+      vars:
+        ifacedata:    "{{ vm_ip_item.pri_ip }}"
+        vm_name:      "{{ vm_ip_item.vmname }}"
+        vm_id:        "{{ vm_ip_item.vmid }}"
+        octet_id:     "{{ vm_ip_item.octet_id }}"
+        tenant_name:  "{{ tenants[vm_ip_item.octet_id] }}"
+      when: vm_ip_item.octet_id in tenants.keys()
+      loop: "{{ ipdata }}"
+      loop_control:
+        loop_var: vm_ip_item
+    
+...        
