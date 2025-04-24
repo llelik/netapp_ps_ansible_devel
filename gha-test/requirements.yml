@@ -1,6 +1,4 @@
 ---
 collections:
-  - name: muccbc.security
-    source: git@github.com:automation-muccbc/ansible_collections.git#muccbc/security
-  - name: muccbc.virt
-    source: git@github.com:automation-muccbc/ansible_collections.git#muccbc/virt
+  - name:  git@github.com:automation-muccbc/ansible_collections.git#muccbc/security
+  - name:  git@github.com:automation-muccbc/ansible_collections.git#muccbc/virt
