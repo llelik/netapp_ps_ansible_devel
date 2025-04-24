@@ -24,11 +24,11 @@ jobs:
       - name: Set up Python and dependencies
         run: |
           # Install required Python libraries
-          pip3.12 install pynetbox
+          pip3.12 install -r gha-test/requirements.txt
 
           # Install Ansible and required collections
           #pip install ansible
-          ansible-galaxy collection install -f netbox.netbox
+          ansible-galaxy install -r gha-test/requirements.yml
 
       - name: Run Ansible Playbook
-        run: ansible-playbook --extra-vars "vault_token_ro=\${{ env.vault_token_ro }} input_cmdb_dest=\${{ github.event.inputs.input_cmdb_dest }}" gha-test.yml
+        run: ansible-playbook --extra-vars "vault_token_ro=\${{ env.vault_token_ro }} input_cmdb_dest=\${{ github.event.inputs.input_cmdb_dest }}" gha-test/gha-test.yml
