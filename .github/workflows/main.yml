@@ -21,13 +21,13 @@ jobs:
       - name: Checkout code
         uses: actions/checkout@v2
 
-      - name: Set up Python and dependencies
+      - name: Set up Python dependencies
         run: |
           # Install required Python libraries
           pip3.12 install -r gha-test/requirements.txt
-
+      - name: Set up Ansible collections dependencies
+        run: |
           # Install Ansible and required collections
-          #pip install ansible
           ansible-galaxy install -r gha-test/requirements.yml
 
       - name: Run Ansible Playbook
