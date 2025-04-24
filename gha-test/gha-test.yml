@@ -10,7 +10,11 @@
     - "/mnt/app_data/ansibleforms-docker/data/playbooks/vars/vm_clusters.yml"
    
   vars:
-    vars_path:           /app/dist/persistent/playbooks/vars
+    netbox_url_dev: http://172.30.233.10:8000/
+    vault_url_dev: https://172.30.233.10:8200/
+    proxmox_api_host: cbc-kvm-11.muccbc.hq.netapp.com:8006
+    netbox_url: https://cbc-ipam02.muccbc.hq.netapp.com
+    vault_url: https://cbc-vault01.muccbc.hq.netapp.com:8200/
   tasks:
     # - name: Read token
     #   set_fact:
@@ -25,7 +29,7 @@
         that: 
           - vault_token_ro is defined
         msg: "Please provide vault token variable"
-
+    - debug: var=vault_token_ro
     - name: Read Vault secrets
       include_role: 
         name: muccbc.security.get_vault_creds
