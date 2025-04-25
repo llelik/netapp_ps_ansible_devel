@@ -29,7 +29,7 @@
         that: 
           - vault_token_ro is defined
         msg: "Please provide vault token variable"
-    - debug: var=vault_token_ro
+    - debug: var=vault_ro
     - name: Read Vault secrets
       include_role: 
         name: muccbc.security.get_vault_creds

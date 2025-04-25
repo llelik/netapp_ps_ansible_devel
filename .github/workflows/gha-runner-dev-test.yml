@@ -11,6 +11,7 @@ on:
 
 env:
   vault_token_ro: \${{ secrets.VAULT_TOKEN_RO }}
+  vault_ro: \${{ env.VAULT_RO }}
 
 
 
