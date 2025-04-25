@@ -1,4 +1,4 @@
-name: My Workflow1
+name: dev_tests_netapp
 on:
   push:
     branches:
