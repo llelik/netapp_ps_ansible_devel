@@ -16,22 +16,22 @@ env:
 
 jobs:
   ansible-gha-test:
-    runs-on: self-hosted
+    runs-on: [self-hosted, docker]
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
 
-      - name: Set up Python dependencies
-        run: |
-          # Install required Python libraries
-          pip3.12 install -r gha-test/requirements.txt
-      - name: Set up Ansible collections dependencies
-        run: |
-          # Install Ansible and required collections
-          ansible-galaxy install -r gha-test/requirements.yml
-      - name: Check Ansible ver
-        run: |
-          ansible-playbook --version
+      # - name: Set up Python dependencies
+      #   run: |
+      #     # Install required Python libraries
+      #     pip3.12 install -r gha-test/requirements.txt
+      # - name: Set up Ansible collections dependencies
+      #   run: |
+      #     # Install Ansible and required collections
+      #     ansible-galaxy install -r gha-test/requirements.yml
+      # - name: Check Ansible ver
+      #   run: |
+      #     ansible-playbook --version
 
       - name: Run Ansible Playbook
         run: ansible-playbook -vvv --extra-vars "vault_token_ro=\${{ env.vault_token_ro }} input_cmdb_dest=\${{ github.event.inputs.input_cmdb_dest }}" gha-test/gha-test.yml
