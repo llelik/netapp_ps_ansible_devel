@@ -16,7 +16,7 @@ env:
 
 jobs:
   ansible-gha-test:
-    runs-on: [self-hosted, docker]
+    runs-on: [self-hosted, standalone]
     steps:
       - name: Checkout code
         uses: actions/checkout@v2
@@ -27,7 +27,6 @@ jobs:
       #     pip3.12 install -r gha-test/requirements.txt
       - name: Set up Ansible collections dependencies
         run: |
-          # Install Ansible and required collections
           ansible-galaxy install -r gha-test/requirements.yml
       # - name: Check Ansible ver
       #   run: |
