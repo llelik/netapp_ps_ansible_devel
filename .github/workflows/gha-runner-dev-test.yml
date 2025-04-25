@@ -25,10 +25,10 @@ jobs:
       #   run: |
       #     # Install required Python libraries
       #     pip3.12 install -r gha-test/requirements.txt
-      # - name: Set up Ansible collections dependencies
-      #   run: |
-      #     # Install Ansible and required collections
-      #     ansible-galaxy install -r gha-test/requirements.yml
+      - name: Set up Ansible collections dependencies
+        run: |
+          # Install Ansible and required collections
+          ansible-galaxy install -r gha-test/requirements.yml
       # - name: Check Ansible ver
       #   run: |
       #     ansible-playbook --version
