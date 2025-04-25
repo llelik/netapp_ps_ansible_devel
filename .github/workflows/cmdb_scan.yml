@@ -1,0 +1,41 @@
+name: cmdb_scan
+on:
+  # push:
+  #   branches:
+  #     - main
+  workflow_dispatch:
+    inputs:
+      input_cmdb_dest:
+        description: 'Destination CMDB'
+        required: true
+
+env:
+  vault_token_ro: \${{ secrets.VAULT_TOKEN_RO }}
+
+
+
+jobs:
+  ansible-proxmox-scan-import:
+    runs-on: self-hosted
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Run Ansible Playbook
+        run: ansible-playbook -vvv --extra-vars "vault_token_ro=\${{ env.vault_token_ro }} input_cmdb_dest=\${{ github.event.inputs.input_cmdb_dest }}" gha-test/gha-test.yml
+  ansible-clusters-scan-import:
+    runs-on: self-hosted
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Run Ansible Playbook
+        run: ansible-playbook -vvv --extra-vars "vault_token_ro=\${{ env.vault_token_ro }} input_cmdb_dest=\${{ github.event.inputs.input_cmdb_dest }}" gha-test/gha-test1.yml
+  ansible-vcenter-scan-import:
+    runs-on: self-hosted
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Run Ansible Playbook
+        run: ansible-playbook -vvv --extra-vars "vault_token_ro=\${{ env.vault_token_ro }} input_cmdb_dest=\${{ github.event.inputs.input_cmdb_dest }}" gha-test/gha-test2.yml
