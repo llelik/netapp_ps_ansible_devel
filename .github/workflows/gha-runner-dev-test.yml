@@ -10,8 +10,8 @@ on:
         required: true
 
 env:
-  vault_token_ro: \${{ secrets.VAULT_TOKEN_RO }}
-  vault_ro: \${{ env.VAULT_RO }}
+  vault_token_ro: ${{ secrets.VAULT_TOKEN_RO }}
+  #vault_ro: ${{ env.VAULT_RO }}
 
 
 
@@ -34,4 +34,4 @@ jobs:
       #     ansible-playbook --version
 
       - name: Run Ansible Playbook
-        run: /usr/local/bin/ansible-playbook -vvv --extra-vars "vault_token_ro=\${{ env.vault_token_ro }} input_cmdb_dest=\${{ github.event.inputs.input_cmdb_dest }}" gha-test/gha-test.yml
+        run: /usr/local/bin/ansible-playbook -vvv --extra-vars "vault_token_ro=${{ env.vault_token_ro }} input_cmdb_dest=${{ github.event.inputs.input_cmdb_dest }}" gha-test/gha-test.yml
