@@ -5,9 +5,9 @@
     - muccbc.security
   vars_files:
     - "/mnt/app_data/ansibleforms-docker/data/playbooks/vars/connection.yml"
-    - "/mnt/app_data/ansibleforms-docker/data/playbooks/vars/vm_templates_map.yml"
-    - "/mnt/app_data/ansibleforms-docker/data/playbooks/vars/vm_net_defaults.yml"
-    - "/mnt/app_data/ansibleforms-docker/data/playbooks/vars/vm_clusters.yml"
+    # - "/mnt/app_data/ansibleforms-docker/data/playbooks/vars/vm_templates_map.yml"
+    # - "/mnt/app_data/ansibleforms-docker/data/playbooks/vars/vm_net_defaults.yml"
+    # - "/mnt/app_data/ansibleforms-docker/data/playbooks/vars/vm_clusters.yml"
    
   vars:
     netbox_url_dev: http://172.30.233.10:8000/
@@ -121,7 +121,7 @@
     
     - name: get final ip data
       set_fact:
-        ipdata: "{{ ip_s | parse_proxmox_vm_ip }}"
+        ipdata: "{{ ip_s | muccbc.cmdb.parse_proxmox_vm_ip }}"
 
     - debug: var=ipdata
 
