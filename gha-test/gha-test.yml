@@ -15,6 +15,7 @@
     proxmox_api_host: cbc-kvm-11.muccbc.hq.netapp.com:8006
     netbox_url: https://cbc-ipam02.muccbc.hq.netapp.com
     vault_url: https://cbc-vault01.muccbc.hq.netapp.com:8200/
+    log_dir: /mnt/shared_data/logs/cmdb_sync
   tasks:
     # - name: Read token
     #   set_fact:
@@ -127,9 +128,10 @@
 
     - set_fact:
         clean_ipdata: "{{ ipdata| rejectattr('pri_ip', 'equalto', []) | to_nice_json }}"
-    - copy:
+    - name: Save logs
+      copy:
         content: "{{ clean_ipdata }}"
-        dest: "./ipdata_proxmox.json"
+        dest: "{{ log_dir }}/{{ lookup('pipe', 'date +%Y%m%d_%H%M') }}_ipdata_proxmox.json"
 
     - fail: msg=STOP
 
