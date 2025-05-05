@@ -22,7 +22,7 @@
     vars_templates:
     vars_overrides:
     vars_local:
-    qlogname: "delete_svm.cleanup"                    # log file name prefix
+    qlogname: "delete_svm.cleanup"                 # log file name prefix
     qlogdir:  "{{ vars['playbook_dir'] }}/logs"    # log file directory
   vars_files:
     - "{{ vars_absolute_path }}/vars.yml"
@@ -43,17 +43,21 @@
         dest_cluster:     "{{ dst_cluster }}"
         api_path_subset:  svm
         new_svm_name:     "{{ dst_cluster.svm }}"
-        clone_volumes:    True
+        clone_volumes:    False
+        snapmirror_options:
+          policy: 'DPDefault'
+          schedule: 'hourly'
+          
         vol_clone_options:
-          split_clone: no
+          split_clone: yes
           set_export_policy: yes
-          clone_vol_type: rw
-          vol_guarantee: 'none'
+          clone_vol_type:    rw
+          vol_guarantee:     'none'
           #source_snapshot: 'hourly.2025-04-23_1805' # optional
         clone_config:
           # - dns
           # - route
-          - export_policy
+          # - export_policy
           # - nfs
           # - name_mapping
           # - unix_group
@@ -61,6 +65,8 @@
           # - iscsi
           #- cifs
           #- cifs_share
+          - snapmirror_policy
+
         
     
     - debug: var=vars_local

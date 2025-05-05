@@ -12,6 +12,7 @@ multi_subset_items:
   - name_mapping
   - unix_user
   - unix_group
+  - snapmirror_policy
 
 config_api_paths:
   svm:
@@ -190,5 +191,22 @@ config_api_paths:
         - name
         - nas.path
         - nas.export_policy.name
+  snapmirror_policy:
+      path: "snapmirror/policies"
+      fields:
+        - name
+        - create_snapshot_on_source 
+        - network_compression_enabled
+        - retention      #dict
+        - rpo
+        - sync_common_snapshot_schedule.name
+        - copy_latest_source_snapshot 
+        - sync_type
+        - comment
+        - transfer_schedule.name
+        - throttle
+        - type
+        - copy_all_source_snapshots
+
 
 

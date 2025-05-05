@@ -1,0 +1,23 @@
+{%- if svm_read_data.snapmirror_policy is defined and svm_read_data.snapmirror_policy | length > 0 -%}
+snapmirror_policy:
+{% for smp in svm_read_data.snapmirror_policy +%}
+  - policy_name:                    {{ smp.name                                | default(omit) }}
+    policy_type:                    {{ smp.policy_type                         | default(omit) }}
+    common_snapshot_schedule:       {{ smp.sync_common_snapshot_schedule       | default(omit) }}
+    copy_all_source_snapshots:      {{ smp.copy_all_source_snapshots           | default(omit) }}
+    copy_latest_source_snapshot:    {{ smp.copy_latest_source_snapshot         | default(omit) }}
+    create_snapshot_on_source:      {{ smp.create_snapshot_on_source           | default(omit) }}
+    is_network_compression_enabled: {{ smp.network_compression_enabled         | default(omit) }}
+    sync_type:                      {{ smp.sync_type                           | default(omit) }}
+    transfer_schedule:              {{ smp.transfer_schedule.name              | default(omit) }}
+    comment:                        {{ smp.comment                             | default(omit) }}
+    {%+ if smp.retention is defined and smp.retention | length > 0 +%}
+    rules: {% for rule in smp.retention | default([]) +%}
+          - snapmirror_label:               {{ rule.label                  | default([])   }}
+            keep:                           {{ rule.count                  | default([])   }}
+            prefix:                         {{ rule.prefix                 | default(omit) }}
+            schedule:                       {{ rule.creation_schedule.name | default(omit) }}
+           {% endfor %}
+    {% endif %}
+{% endfor %}
+{% endif %}

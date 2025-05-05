@@ -5,18 +5,19 @@
   vars_files:
     - "{{ vars_absolute_path }}/vars.yml"
   tasks:
-    # - name: patch bootarg
-    #   netapp.ontap.na_ontap_rest_cli:
-    #     hostname: "{{ src_cluster.hostname }}"
-    #     username: "{{ src_cluster.username }}"
-    #     password: "{{ src_cluster.password }}"
-    #     validate_certs: no
-    #     command: debug/kenv
-    #     verb: PATCH
-    #     params:
-    #       node: trinidad-01
-    #     body:
-    #       bootarg.login.allowdiag: "True"
+    - name: patch bootarg
+      netapp.ontap.na_ontap_rest_cli:
+        hostname: "{{ src_cluster.hostname }}"
+        username: "{{ src_cluster.username }}"
+        password: "{{ src_cluster.password }}"
+        validate_certs: no
+        command: debug/kenv
+        verb: PATCH
+        #params:
+        #  node: trinidad-01
+        body:
+          variable: 'bootarg.login.allowdiag'
+          value: True
 
     # - name: patch bootarg with command
     #   netapp.ontap.na_ontap_command:
@@ -27,7 +28,17 @@
     #     privilege: advanced
     #     command: ['systemshell','-node','*','-command','sudo','kenv','bootarg.login.allowdiag="true"']
     #     #systemshell -node trinidad-01 -command sudo kenv bootarg.login.allowdiag="true"
-    
+    # - name: patch with uri
+    #   uri:
+    #     url: "https://{{ src_cluster.hostname }}/api/private/cli/debug/kenv?variable=bootarg.login.allowdiag"
+    #     method: PATCH
+    #     user: "{{ src_cluster.username }}"
+    #     password: "{{ src_cluster.password }}"
+    #     validate_certs: no
+    #     body_format: json
+    #     body:
+    #       value: False
+      
 
 
       

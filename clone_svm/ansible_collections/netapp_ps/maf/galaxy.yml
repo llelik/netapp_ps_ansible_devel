@@ -16,6 +16,7 @@ readme: README.md
 # A list of the collection's content authors. Can be just the name or in the format 'Full Name <email> (url)
 # @nicks:irc/im.site#channel'
 authors:
+- Mirko van Colen  <mirko.vancolen@netapp.com>
 - Alexey Mikhaylov <alexeym@netapp.com>
 
 

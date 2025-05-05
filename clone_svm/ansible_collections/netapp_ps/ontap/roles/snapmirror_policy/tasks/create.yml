@@ -1,15 +1,17 @@
 ---
+
 - name: "Role - ontap/snapmirror_policy/create"
+  when: smp_item.policy_name | default(false)
   block:
   - set_fact:
       auth: &auth
         hostname: "{{ auth_rest.hostname | default(omit) }}"
         username: "{{ auth_rest.username | default(omit) }}"
         password: "{{ auth_rest.password | default(omit) }}"
-        key_filepath: "{{ auth_rest.key_filepath | default(omit) }}"
-        cert_filepath: "{{ auth_rest.cert_filepath | default(omit) }}"
+        key_filepath:   "{{ auth_rest.key_filepath | default(omit) }}"
+        cert_filepath:  "{{ auth_rest.cert_filepath | default(omit) }}"
         validate_certs: "{{ auth_rest_validate_certs | default(false) }}"
-        use_rest: always
+        use_rest:       always
     no_log: true
 
   # logging
@@ -18,14 +20,43 @@
       l_svm:               "{{ svm               | to_nice_yaml(2) | indent(2,true) | netapp_ps.maf.do_log('','svm',qlogdir,qlogname) }}"
       l_snapmirror_policy: "{{ snapmirror_policy | to_nice_yaml(2) | indent(2,true) | netapp_ps.maf.do_log('','snapmirror_policy',qlogdir,qlogname) }}"
 
+  - ansible.builtin.set_fact:
+      sm_labels:   []
+      sm_keep:     []
+      sm_prefix:   []
+      sm_schedule: []
+
+  - name: Build retention lists
+    ansible.builtin.set_fact:
+      sm_labels:   "{{ sm_labels   | default([]) + [rule_item.snapmirror_label] }}"
+      sm_keep:     "{{ sm_keep     | default([]) + [rule_item.keep] }}"
+      sm_prefix:   "{{ sm_prefix   | default([]) + [rule_item.prefix] }}"
+      sm_schedule: "{{ sm_schedule | default([]) + [rule_item.schedule] }}"
+    loop: "{{ smp_item.rules | default([]) }}"
+    loop_control:
+      loop_var: rule_item
+    when:
+      - smp_item.rules | default([]) | length > 0
+
     ## Create Snapmirror Policy
-  - name: "Create Snapmirror Policy [{{ snapmirror.policy_name | default('None') }}]"          
+  - name: "Create Snapmirror Policy [{{ smp_item.policy_name | default('None') }}]"          
     netapp.ontap.na_ontap_snapmirror_policy:
-      state            : present
-      vserver          : "{{ svm.name }}"
-      name             : "{{ snapmirror.policy_name               | default(omit)   }}"
-      snapmirror_label : "{{ snapmirror.policy_snapmirror_label   | default([])   }}"
-      keep             : "{{ snapmirror.policy_keep               | default([])   }}"
       <<: *auth
-    delegate_to: localhost
-  when: snapmirror.policy_name | default(false)
+      state:                          present
+      vserver:                        "{{ svm.name }}"
+      policy_name:                    "{{ smp_item.policy_name                    | default(omit) }}"
+      policy_type:                    "{{ smp_item.policy_type                    | default(omit) }}"
+      common_snapshot_schedule:       "{{ smp_item.common_snapshot_schedule       | default(omit) }}"   
+      copy_all_source_snapshots:      "{{ smp_item.copy_all_source_snapshots      | default(omit) }}"
+      copy_latest_source_snapshot:    "{{ smp_item.copy_latest_source_snapshot    | default(omit) }}"
+      create_snapshot_on_source:      "{{ smp_item.create_snapshot_on_source      | default(omit) }}"
+      is_network_compression_enabled: "{{ smp_item.is_network_compression_enabled | default(omit) }}"
+      comment:                        "{{ smp_item.comment                        | default(omit) }}"
+      sync_type:                      "{{ smp_item.sync_type                      | default(omit) }}"
+      transfer_schedule:              "{{ transfer_schedule.name                  | default(omit) }}"
+      snapmirror_label:               "{{ sm_labels                               | default([])   }}"
+      keep:                           "{{ sm_keep                                 | default([])   }}"
+      prefix:                         "{{ sm_prefix                               | default(omit) }}"
+      schedule:                       "{{ sm_schedule                             | default(omit) }}"
+  
+...

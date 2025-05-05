@@ -1,7 +1,7 @@
 ---
 - name: Merge Extravars
   ansible.builtin.set_fact:
-    snapmirror_policy : "{{ 'snapmirror_policy' | netapp_ps.maf.merge_vars(d=vars_defaults,t=vars_templates,v=vars_local,o=vars_overrides,c=qtask_child,s=qtask_suffix) }}"
+    snapmirror_policy : "{{ 'snapmirror_policy' | netapp_ps.maf.merge_vars(d=vars_defaults,t=vars_templates,v=vars_local,l=smp_item,o=vars_overrides,c=qtask_child,s=qtask_suffix) }}"
     svm               : "{{ 'svm'               | netapp_ps.maf.merge_vars(d=vars_defaults,t=vars_templates,v=vars_local,o=vars_overrides,c=qtask_child) }}"
     cluster           : "{{ 'cluster'           | netapp_ps.maf.merge_vars(d=vars_defaults,t=vars_templates,v=vars_local,o=vars_overrides,c=qtask_child) }}"
 
