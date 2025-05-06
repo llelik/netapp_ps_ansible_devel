@@ -1,4 +1,4 @@
-{%- if svm_read_data.route is defined and svm_read_data.route | length > 0 -%}
+{% if svm_read_data.route is defined and svm_read_data.route | length > 0 %}
 route:
 {% for rt in svm_read_data.route %}
   - gateway:      {{ rt.gateway             | default(omit) }}

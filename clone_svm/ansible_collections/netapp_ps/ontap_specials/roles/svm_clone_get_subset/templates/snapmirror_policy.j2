@@ -1,6 +1,7 @@
-{%- if svm_read_data.snapmirror_policy is defined and svm_read_data.snapmirror_policy | length > 0 -%}
+
+{% if svm_read_data.snapmirror_policy is defined and svm_read_data.snapmirror_policy | length > 0 %}
 snapmirror_policy:
-{% for smp in svm_read_data.snapmirror_policy +%}
+{%+ for smp in svm_read_data.snapmirror_policy +%}
   - policy_name:                    {{ smp.name                                | default(omit) }}
     policy_type:                    {{ smp.policy_type                         | default(omit) }}
     common_snapshot_schedule:       {{ smp.sync_common_snapshot_schedule       | default(omit) }}
@@ -11,8 +12,8 @@ snapmirror_policy:
     sync_type:                      {{ smp.sync_type                           | default(omit) }}
     transfer_schedule:              {{ smp.transfer_schedule.name              | default(omit) }}
     comment:                        {{ smp.comment                             | default(omit) }}
-    {%+ if smp.retention is defined and smp.retention | length > 0 +%}
-    rules: {% for rule in smp.retention | default([]) +%}
+    {% if smp.retention is defined and smp.retention | length > 0 -%}
+    rules: {%+ for rule in smp.retention | default([]) +%}
           - snapmirror_label:               {{ rule.label                  | default([])   }}
             keep:                           {{ rule.count                  | default([])   }}
             prefix:                         {{ rule.prefix                 | default(omit) }}
@@ -20,4 +21,4 @@ snapmirror_policy:
            {% endfor %}
     {% endif %}
 {% endfor %}
-{% endif %}
+{% endif +%}

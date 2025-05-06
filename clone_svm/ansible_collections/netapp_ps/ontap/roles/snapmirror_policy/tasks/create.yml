@@ -19,19 +19,20 @@
       l_cluster:           "{{ cluster           | to_nice_yaml(2) | indent(2,true) | netapp_ps.maf.do_log('ontap/snapmirror_policy/create','cluster',qlogdir,qlogname) }}"
       l_svm:               "{{ svm               | to_nice_yaml(2) | indent(2,true) | netapp_ps.maf.do_log('','svm',qlogdir,qlogname) }}"
       l_snapmirror_policy: "{{ snapmirror_policy | to_nice_yaml(2) | indent(2,true) | netapp_ps.maf.do_log('','snapmirror_policy',qlogdir,qlogname) }}"
-
+  
+  # clearing vars on each run
   - ansible.builtin.set_fact:
       sm_labels:   []
       sm_keep:     []
       sm_prefix:   []
       sm_schedule: []
 
-  - name: Build retention lists
+  - name: Build retention values
     ansible.builtin.set_fact:
-      sm_labels:   "{{ sm_labels   | default([]) + [rule_item.snapmirror_label] }}"
-      sm_keep:     "{{ sm_keep     | default([]) + [rule_item.keep] }}"
-      sm_prefix:   "{{ sm_prefix   | default([]) + [rule_item.prefix] }}"
-      sm_schedule: "{{ sm_schedule | default([]) + [rule_item.schedule] }}"
+      sm_labels:   "{{ sm_labels   | default([]) + [rule_item.snapmirror_label | default('')] }}"
+      sm_keep:     "{{ sm_keep     | default([]) + [rule_item.keep             | default('')] }}"
+      sm_prefix:   "{{ sm_prefix   | default([]) + [rule_item.prefix           | default('')] }}"
+      sm_schedule: "{{ sm_schedule | default([]) + [rule_item.schedule         | default('')] }}"
     loop: "{{ smp_item.rules | default([]) }}"
     loop_control:
       loop_var: rule_item

@@ -11,3 +11,4 @@
     loop_var: smp_item
     label: "Creating SM policy {{ smp_item.policy_name }}"
   loop: "{{ snapmirror_policy }}"
+...

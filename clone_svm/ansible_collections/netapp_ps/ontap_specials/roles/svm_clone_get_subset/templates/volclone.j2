@@ -7,5 +7,6 @@ volclone:
     destination_volume:   {{ vol.name }}
     export_policy:        {{ vol.nas.export_policy.name | default(omit) }}
     junction_path:        {{ vol.nas.path               | default(omit) }}
+    snapshot_policy:      {{ vol.snapshot_policy.name   | default(omit) }}
 {% endif %}
 {% endfor %}

@@ -21,4 +21,4 @@
   no_log: true
   set_fact:
     auth_rest: "{{ netapp_hostname | netapp_ps.maf.auth_rest(netapp_username,netapp_password,netapp_api_certificate_base,netapp_api_use_certificate) }}"
-
+...

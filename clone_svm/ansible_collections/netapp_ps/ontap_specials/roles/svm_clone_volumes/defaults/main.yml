@@ -3,5 +3,6 @@
 clone_options:
   split_clone: yes
   set_export_policy: yes
+  set_snapshot_policy: yes
   clone_vol_type: rw
   vol_guarantee: 'none'

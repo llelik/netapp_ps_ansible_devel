@@ -11,6 +11,7 @@
 
 ---
 - hosts: localhost
+  #strategy: debug
   gather_facts: no
   connection: local
   collections: 
@@ -43,7 +44,7 @@
         dest_cluster:     "{{ dst_cluster }}"
         api_path_subset:  svm
         new_svm_name:     "{{ dst_cluster.svm }}"
-        clone_volumes:    False
+        clone_volumes:    True  # deps: export_policy
         snapmirror_options:
           policy: 'DPDefault'
           schedule: 'hourly'
@@ -51,13 +52,14 @@
         vol_clone_options:
           split_clone: yes
           set_export_policy: yes
+          set_snapshot_policy: yes
           clone_vol_type:    rw
           vol_guarantee:     'none'
           #source_snapshot: 'hourly.2025-04-23_1805' # optional
         clone_config:
           # - dns
           # - route
-          # - export_policy
+          - export_policy
           # - nfs
           # - name_mapping
           # - unix_group
@@ -65,7 +67,8 @@
           # - iscsi
           #- cifs
           #- cifs_share
-          - snapmirror_policy
+          - snapshot_policy
+          # - snapmirror_policy
 
         
     

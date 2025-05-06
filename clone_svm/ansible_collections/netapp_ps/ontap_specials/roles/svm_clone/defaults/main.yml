@@ -13,6 +13,7 @@ multi_subset_items:
   - unix_user
   - unix_group
   - snapmirror_policy
+  - snapshot_policy
 
 config_api_paths:
   svm:
@@ -191,6 +192,7 @@ config_api_paths:
         - name
         - nas.path
         - nas.export_policy.name
+        - snapshot_policy.name
   snapmirror_policy:
       path: "snapmirror/policies"
       fields:
@@ -207,6 +209,13 @@ config_api_paths:
         - throttle
         - type
         - copy_all_source_snapshots
+  snapshot_policy:
+      path: "storage/snapshot-policies"
+      fields:
+        - name
+        - copies   # list of dicts
+        - enabled
+        - comment
 
 
 

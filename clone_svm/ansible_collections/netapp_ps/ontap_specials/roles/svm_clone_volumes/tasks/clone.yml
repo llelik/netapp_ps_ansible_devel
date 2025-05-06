@@ -64,4 +64,14 @@
       export_policy:   "{{ volclone_item.export_policy       | default(omit) }}"
     when:
       - volclone_item.export_policy is defined and clone_options.set_export_policy | default(false) | bool
+  
+  - name: Set Snapshot Policy for cloned volumes
+    netapp.ontap.na_ontap_volume:
+      <<:                *auth
+      state:             present
+      vserver:           "{{ volclone.destination_svm }}"
+      name:              "{{ volclone_item.destination_volume }}"
+      snapshot_policy:   "{{ volclone_item.snapshot_policy       | default(omit) }}"
+    when:
+      - volclone_item.snapshot_policy is defined and clone_options.set_snapshot_policy | default(false) | bool
 ...

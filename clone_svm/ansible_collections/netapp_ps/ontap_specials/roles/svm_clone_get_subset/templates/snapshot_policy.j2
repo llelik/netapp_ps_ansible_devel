@@ -1,0 +1,18 @@
+
+{% if svm_read_data.snapshot_policy is defined and svm_read_data.snapshot_policy | length > 0 %}
+snapshot_policy:
+{%+ for snap in svm_read_data.snapshot_policy +%}
+  - name:               {{ snap.name       | default(omit) }}
+    comment:            {{ snap.comment    | default(omit) }}
+    enabled:            {{ snap.enabled    | default(True) }}
+    {% if snap.copies is defined and snap.copies | length > 0 -%}
+    copies: {%+ for cp in snap.copies | default([]) +%}
+          - snapmirror_label: '{{ cp.snapmirror_label | default('')   }}'
+            count:            {{ cp.count            | default([])   }}
+            prefix:           {{ cp.prefix           | default(omit) }}
+            schedule:         {{ cp.schedule.name    | default(omit) }}
+            retention_period: {{ cp.retention_period | default(omit) }}
+           {% endfor %}
+    {% endif %}
+{% endfor %}
+{% endif +%}

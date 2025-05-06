@@ -4,4 +4,4 @@
 - name: Merge Extravars
   ansible.builtin.set_fact:
     snapmirror_policy : "{{ 'snapmirror_policy' | netapp_ps.maf.merge_lists(v=vars_local,required_keys=['policy_name'],c=qtask_child) }}"
-
+...
