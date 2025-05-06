@@ -1,0 +1,30 @@
+##########################################################################
+#
+# - instances defaults
+# 
+#
+# 
+# Alexey Mikhaylov
+# NetApp Deutschland GmbH
+# Professional Services 2025
+##########################################################################
+vars_templates:
+vars_overrides:
+vars_defaults:
+  ora_volume:
+    volume:
+      wait_for_completion: true
+      percent_snapshot_space: 5                     # ONTAP default
+      space_guarantee:        'none'
+      read_realloc:           'off'                 # ONTAP default
+      language:               c.utf_8
+      type:                   rw
+      size_unit:              gb
+      snapshot_policy:
+        name:                 'none'
+      security_style:         unix
+      volume_autosize:
+        mode:                 'grow_shrink'                 # ONTAP default 
+      volume_efficiency:
+          volume_efficiency:         start
+          policy:                    default

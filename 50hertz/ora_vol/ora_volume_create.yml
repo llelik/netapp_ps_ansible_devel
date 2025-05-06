@@ -1,0 +1,67 @@
+#########################
+# Playbook creates:
+#- create 4 volumes for Oracle
+# (c) Alexey Mikhaylov
+# NetApp Professional Services Germany
+# alexey.mikhaylov@netapp.com  
+#
+# DEMO purpose only!
+#########################
+
+---
+- hosts: localhost
+  #strategy: debug
+  gather_facts: no
+  connection: local
+  collections: 
+    - netapp_ps.ontap
+    - netapp_ps.maf
+    - ontap_ps.fiftyhertz
+  vars: 
+    vars_absolute_path: /home/cbcadmin/vars/
+    qlogname: "clone_svm.demo"                     # log file name prefix
+    qlogdir:  "{{ vars['playbook_dir'] }}/logs"    # log file directory
+  vars_files:
+    - "vars/50hertz/defaults.yml"
+  tasks:
+    - ansible.builtin.include_role:
+        name: netapp_ps.fiftyhertz.facts
+      vars:
+        qtask: credentials
+
+    # Validate input variables
+    - ansible.builtin.include_role:
+        name: netapp_ps.fiftyhertz.facts
+      vars:
+        qtask: input_validation
+
+    
+    # Create local vars based on input values 
+    - name: Render local vars
+      ansible.builtin.set_fact:
+        vars_local: "{{ lookup('template', 'vars/50hertz/templates/local.j2') | from_yaml }}"
+      #when: 1 == 0
+    - debug: var=vars_local
+    # Check inventory SVMs availability
+    - ansible.builtin.include_role:
+        name: netapp_ps.fiftyhertz.logic
+      vars:
+        qtask: 00_preflight_checks
+
+    # Check if volume already exists and set new volume name incerementing by 1
+    - ansible.builtin.include_role:
+        name: netapp_ps.fiftyhertz.logic
+      vars:
+        qtask: 01_preflight_setup
+      when: 1 == 0
+
+    - ansible.builtin.include_role:
+        name: netapp_ps.ontap.volume
+      vars:
+        qtask: facts_multi
+        qchild: ora_volumes
+    - ansible.builtin.include_role:
+        name: netapp_ps.ontap.volume
+      vars:
+        qtask: create_multi
+        qchild: ora_volumes

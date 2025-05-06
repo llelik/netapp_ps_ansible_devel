@@ -1,0 +1,41 @@
+  ora_volumes:
+    cluster:
+      management_ip:   {{ input_mgmt_ip }}
+    volumes:
+      - name:          n_{{ input_svm[4:8]}}_{{ input_hostname }}_cvol01
+        size:          50
+        junction_path: /n_{{ input_svm[4:8]}}_{{ input_hostname }}_cvol01
+        export_policy:
+          name:        {{ input_hostname }}
+        qos_policy_group:
+          name:        {{ input_hostname | upper }}
+      - name:          n_{{ input_svm[4:8]}}_{{ input_hostname }}_rvol01
+        size:          50
+        junction_path: /n_{{ input_svm[4:8]}}_{{ input_hostname }}_rvol01
+        export_policy:
+          name:        {{ input_hostname }}
+        qos_policy_group:
+          name:        {{ input_hostname | upper }}
+      - name:          n_{{ input_svm[4:8]}}_{{ input_hostname }}_dvol01
+        size:          {{ input_dvol_size }}
+        junction_path: /n_{{ input_svm[4:8]}}_{{ input_hostname }}_dvol01
+        export_policy:
+          name:        {{ input_hostname }}
+        qos_policy_group:
+          name:        {{ input_hostname | upper }}
+      - name:          n_{{ input_svm[4:8]}}_{{ input_hostname }}_tvol01
+        size:          50
+        junction_path: /n_{{ input_svm[4:8]}}_{{ input_hostname }}_tvol01
+        export_policy:
+          name:        {{ input_hostname }}
+        qos_policy_group:
+          name:        {{ input_hostname | upper }}
+    export_policy:
+      name:            {{ input_hostname }}
+      rules:
+        - client_match: {{ input_clientmatch | default('0.0.0.0/0') }}
+          rule_index: 1
+          ro_rule: sys
+          rw_rule: sys
+          protocol: nfs3
+          super_user_security: sys

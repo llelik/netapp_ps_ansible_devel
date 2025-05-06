@@ -1,0 +1,15 @@
+---
+- name: Validate input
+  ansible.builtin.assert:
+    that:
+      - input_dvol_size is defined
+      #- input_dvol_size is integer
+      - input_username is defined
+      - input_password is defined
+      - input_hostname is defined
+      - input_vlan is defined
+      - input_svm is defined
+      - input_hostname is defined
+      - input_clientmatch is defined
+      - input_mgmt_ip is defined
+    msg: "Some input values are not defined. Aborting."

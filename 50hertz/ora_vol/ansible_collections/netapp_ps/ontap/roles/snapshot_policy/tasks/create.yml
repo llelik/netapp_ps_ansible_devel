@@ -1,0 +1,56 @@
+---
+- name: "Role - ontap/snapshot_policy/create"
+  block:
+  - set_fact:
+      auth: &auth
+        hostname: "{{ auth_rest.hostname | default(omit) }}"
+        username: "{{ auth_rest.username | default(omit) }}"
+        password: "{{ auth_rest.password | default(omit) }}"
+        key_filepath:   "{{ auth_rest.key_filepath | default(omit) }}"
+        cert_filepath:  "{{ auth_rest.cert_filepath | default(omit) }}"
+        validate_certs: "{{ auth_rest_validate_certs | default(false) }}"
+        use_rest: always
+    no_log: true
+
+  # logging
+  - set_fact:
+      l_cluster:          "{{ cluster         | to_nice_yaml(2) | indent(2,true) | netapp_ps.maf.do_log('ontap/snapshot_policy/create','cluster',qlogdir,qlogname) }}"
+      l_svm:              "{{ svm             | to_nice_yaml(2) | indent(2,true) | netapp_ps.maf.do_log('','svm',qlogdir,qlogname) }}"
+      l_snapshot_policy:  "{{ snapshot_policy | to_nice_yaml(2) | indent(2,true) | netapp_ps.maf.do_log('','snapshot_policy',qlogdir,qlogname) }}"
+  
+  # clearing vars on each loop run
+  - ansible.builtin.set_fact:
+      snap_sm_labels:  []
+      snap_count:      []
+      snap_prefix:     []
+      snap_schedule:   []
+
+  - name: Build retention values
+    ansible.builtin.set_fact:
+      snap_sm_labels: "{{ snap_sm_labels | default([]) + [copies_item.snapmirror_label | netapp_ps.ontap.dash_to_empty] }}"
+      snap_count:     "{{ snap_count     | default([]) + [copies_item.count            | default('')] }}"
+      snap_prefix:    "{{ snap_prefix    | default([]) + [copies_item.prefix           | default('')] }}"
+      snap_schedule:  "{{ snap_schedule  | default([]) + [copies_item.schedule         | default('')] }}"
+      snap_retention: "{{ snap_retention | default([]) + [copies_item.retention_period | default('')] }}"
+    loop: "{{ snap_item.copies | default([]) }}"
+    loop_control:
+      loop_var: copies_item
+    when:
+      - snap_item.copies | default([]) | length > 0
+
+    ## Create Snapshot Policy
+  - name: "Create Snapshot Policy [{{ snapshot_policy.name | default('None') }}]"          
+    netapp.ontap.na_ontap_snapshot_policy:
+      <<: *auth
+      state:   present
+      vserver:          "{{ svm.name }}"
+      name:             "{{ snapshot_policy.name    | default(omit) }}"
+      enabled:          "{{ snapshot_policy.enabled | default(omit) }}"
+      comment:          "{{ snapshot_policy.comment | default(omit) }}"
+      schedule:         "{{ snap_schedule           | default(omit) }}"
+      snapmirror_label: "{{ snap_sm_labels          | default(omit) }}"
+      prefix:           "{{ snap_prefix             | default(omit) }}"
+      count:            "{{ snap_count              | default(omit) }}"
+      retention_period: "{{ snap_retention          | default(omit) }}"
+     
+...
